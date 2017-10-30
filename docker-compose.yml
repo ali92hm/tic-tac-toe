@@ -1,0 +1,28 @@
+version: '3'
+services:
+# Tick tack toe
+  tic-tac-toe:
+    image: node:8.8-alpine
+    working_dir: /usr/src
+    volumes:
+      - .:/usr/src
+    ports:
+      - 3000:3000
+    command: npm run dev
+    env_file: dev.env
+    depends_on:
+      - db
+# MongoDB data viewer
+  mongo-express:
+    image: mongo-express
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=db
+    ports:
+      - 8081:8081
+    depends_on:
+      - db
+# Database service
+  db:
+    image: mongo:3.0
+    ports:
+      - 27017:27017
