@@ -1,4 +1,4 @@
-const Game = require('../models/Games')
+const Game = require('../models/games')
 
 exports.MongoAdapter = class {
   getAllGames () {
@@ -18,7 +18,15 @@ exports.MongoAdapter = class {
     return count > 0
   }
 
-  createGame (address, img) {
-    return Game.create({ })
+  createGame (teamId, channelId, xUser, yUser) {
+    return Game.create({
+      teamId: teamId,
+      channelId: channelId,
+      xUser: xUser,
+      yUser: yUser,
+      board: new Array(9),
+      isXTurn: true,
+      created: Date.now()
+    })
   }
 }
