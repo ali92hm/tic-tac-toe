@@ -24,6 +24,7 @@ router.post('/', (req, res, next) => {
   })
 
   controller.tttHandler(fields.team_id, fields.channel_id, fields.user_id, fields.text)
+    .then(util.formatSlackResult())
     .then(util.respondWithResult(res))
     .catch(util.handleInternalError(res))
 })

@@ -7,6 +7,15 @@ exports.respondWithResult = (res, statusCode) => {
   }
 }
 
+exports.formatSlackResult = () => {
+  return (message) => {
+    return {
+      response_type: 'in_channel',
+      text: message.toString()
+    }
+  }
+}
+
 exports.respondWithSuccess = (res, statusCode) => {
   statusCode = statusCode || 202
   return () => {
