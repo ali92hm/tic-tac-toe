@@ -3,6 +3,7 @@ const config = require('config')
 
 const app = express()
 
+require('./config/mongo')(app, config)
 require('./config/express')(app, config)
 
 app.listen(config.get('port'), () => {
