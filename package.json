@@ -23,6 +23,7 @@
     "express": "^4.15.3",
     "glob": "^7.1.2",
     "lodash": "^4.17.4",
+    "mongoose": "^4.12.5",
     "morgan": "^1.8.2"
   },
   "devDependencies": {
