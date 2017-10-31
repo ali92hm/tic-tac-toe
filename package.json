@@ -6,13 +6,14 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "NODE_ENV=test mocha --recursive test",
-    "test:coverage": "nyc npm test",
-    "test:unit": "mocha --recursive test/middleware test/models test/routes",
-    "test:integration": "mocha --recursive test/integration"
+    "test": "NODE_ENV=test jest"
   },
   "engines": {
     "node": "8.8.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "verbose": true
   },
   "dependencies": {
     "body-parser": "^1.17.2",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "chai": "^4.1.0",
+    "jest": "^21.2.1",
     "mocha": "^3.4.2",
     "nodemon": "^1.11.0",
     "nyc": "^11.0.3",
