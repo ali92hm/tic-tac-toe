@@ -2,10 +2,10 @@ const express = require('express')
 const _ = require('lodash')
 const router = express.Router()
 const util = require('../utils/response')
-const controller = require('../controllers/ttt')
+const controller = require('../controllers/slack-ttt')
 
 module.exports = (app) => {
-  app.use('/api/ttt', router)
+  app.use('/api/slack/ttt', router)
 }
 
 router.post('/', (req, res, next) => {
