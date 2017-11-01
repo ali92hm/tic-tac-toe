@@ -2,20 +2,12 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const GameSchema = new Schema({
-  teamId: {
-    type: String,
+  xPlayer: {
+    type: Schema.Types.ObjectId,
     required: true
   },
-  channelId: {
-    type: String,
-    required: true
-  },
-  xUser: {
-    type: String,
-    required: true
-  },
-  yUser: {
-    type: String,
+  oPlayer: {
+    type: Schema.Types.ObjectId,
     required: true
   },
   board: {
@@ -32,7 +24,7 @@ const GameSchema = new Schema({
   },
   updated: {
     type: Date,
-    default: Date.now
+    default: Date.now()
   },
   finished: {
     type: Date
