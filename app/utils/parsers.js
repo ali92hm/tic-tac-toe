@@ -4,7 +4,7 @@ const isUserRegx = /<@(U|W).+>/i
 const commandParser = (text) => {
   let output = {
     command: 'default',
-    arguments: []
+    args: []
   }
 
   if (!text || text === '') {
@@ -24,7 +24,7 @@ const commandParser = (text) => {
   output.command = _.first(delimitedText)
 
   if (delimitedText.length > 1) {
-    output.arguments = _.drop(delimitedText)
+    output.args = _.drop(delimitedText)
   }
 
   return output

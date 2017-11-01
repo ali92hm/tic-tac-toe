@@ -6,7 +6,7 @@ describe('commandParser(text)', () => {
   beforeEach(() => {
     defaultRetrun = {
       command: 'default',
-      arguments: []
+      args: []
     }
   })
 
@@ -42,17 +42,26 @@ describe('commandParser(text)', () => {
     expect(parser.commandParser(text)).toEqual(defaultRetrun)
   })
 
+  test('should return command challege and array of userId', () => {
+    let text = 'challege @<@U7QP7APCL|username>'
+    let expectedResult = {
+      command: 'challege',
+      args: ['@<@u7qp7apcl|username>']
+    }
+    expect(parser.commandParser(text)).toEqual(expectedResult)
+  })
+
   test('should return command name and empty array if text is multiple words', () => {
-    let text = 'somecommand arg1 ARG2 arg3 44 a - :: <@U7QP7APCL|username>'
+    let text = 'somecommand arg1 ARG2 arg3 44 a - :: @<@U7QP7APCL|username>'
     defaultRetrun.command = 'somecommand'
-    defaultRetrun.arguments = ['arg1', 'arg2', 'arg3', '44', 'a', '-', '::', '<@u7qp7apcl|username>']
+    defaultRetrun.args = ['arg1', 'arg2', 'arg3', '44', 'a', '-', '::', '@<@u7qp7apcl|username>']
     expect(parser.commandParser(text)).toEqual(defaultRetrun)
   })
 
   test('should return command name and empty array if text is multiple words with any number of spaces', () => {
     let text = 'somecommand    aRg1 arg2 arg3        44    A'
     defaultRetrun.command = 'somecommand'
-    defaultRetrun.arguments = ['arg1', 'arg2', 'arg3', '44', 'a']
+    defaultRetrun.args = ['arg1', 'arg2', 'arg3', '44', 'a']
     expect(parser.commandParser(text)).toEqual(defaultRetrun)
   })
 })
