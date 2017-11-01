@@ -10,7 +10,7 @@ exports.MongoAdapter = class {
   }
 
   getGameByChannelId (channelId) {
-    return Game.find({ channelId: channelId }).exec()
+    return Game.findOne({ channelId: channelId, winner: undefined }).exec()
   }
 
   async exists (channelId) {
@@ -18,12 +18,20 @@ exports.MongoAdapter = class {
     return count > 0
   }
 
-  createGame (teamId, channelId, xUser, yUser) {
+  updateGame (gameId, isXTurn, board, winner) {
+    return Game.update({ '_id': gameId }, {
+      isXTurn: isXTurn,
+      updated: Date.now(),
+      board: board
+    })
+  }
+
+  createGame (teamId, channelId, xUserId, yUserId) {
     return Game.create({
       teamId: teamId,
       channelId: channelId,
-      xUser: xUser,
-      yUser: yUser,
+      xUser: xUserId,
+      yUser: yUserId,
       board: new Array(9),
       isXTurn: true,
       created: Date.now()
