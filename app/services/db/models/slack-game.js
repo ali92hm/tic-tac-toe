@@ -10,14 +10,10 @@ const SlackGameSchema = new Schema({
     type: String,
     required: true
   },
-  _gameId: {
+  game: {
     type: Schema.Types.ObjectId,
+    ref: 'Game',
     required: true
-  },
-  inProgress: {
-    type: Boolean,
-    required: true,
-    default: false
   }
 })
 
