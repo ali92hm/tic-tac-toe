@@ -1,4 +1,4 @@
-const Users = require('../../models/users')
+const Users = require('./models/users')
 
 const getAll = () => {
   return Users.find().exec()
@@ -10,11 +10,6 @@ const getById = (_id) => {
 
 const getByUniqueId = (uniqueId) => {
   return Users.findOne({uniqueId: uniqueId}).exec()
-}
-
-// TODO: Implement update User
-const update = (_id, fields) => {
-  throw new Error('Not implemented')
 }
 
 const create = (uniqueId, externalId, outlet, email, firstName, lastName) => {
@@ -29,10 +24,20 @@ const create = (uniqueId, externalId, outlet, email, firstName, lastName) => {
   })
 }
 
+// TODO: Implement update User
+const update = (_id, fields) => {
+  throw new Error('Not implemented')
+}
+
+const remove = async (_id) => {
+  return Users.remove({ _id: _id }).exec()
+}
+
 module.exports = {
   getAll,
   getById,
   getByUniqueId,
+  create,
   update,
-  create
+  remove
 }
