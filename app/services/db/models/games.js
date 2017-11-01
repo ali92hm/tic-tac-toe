@@ -4,10 +4,12 @@ const Schema = mongoose.Schema
 const GameSchema = new Schema({
   xPlayer: {
     type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
   oPlayer: {
     type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
   board: {

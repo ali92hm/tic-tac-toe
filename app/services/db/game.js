@@ -1,17 +1,17 @@
-const Game = require('../../models/games')
+const Game = require('./models/games')
 
 const getAll = () => {
-  return Game.find().exec()
+  return Game.find().populate('xPlayer').populate('oPlayer').exec()
 }
 
 const getById = (_id) => {
-  return Game.findById(_id).exec()
+  return Game.findById(_id).populate('xPlayer').populate('oPlayer').exec()
 }
 
-const create = (teamId, channelId, xUserId, yUserId) => {
+const create = (xPlayer, oPlayer) => {
   return Game.create({
-    xUser: xUserId,
-    yUser: yUserId,
+    xPlayer: xPlayer,
+    oPlayer: oPlayer,
     board: new Array(9),
     isXTurn: true,
     created: Date.now()
@@ -19,11 +19,16 @@ const create = (teamId, channelId, xUserId, yUserId) => {
 }
 
 const update = (_id, isXTurn, board, winner) => {
-  return Game.update({ _id: _id }, {
-    isXTurn: isXTurn,
-    updated: Date.now(),
-    board: board
-  })
+  let finished = winner ? Date.now() : undefined
+  return Game.findByIdAndUpdate(_id, {
+    $set: {
+      isXTurn: isXTurn,
+      board: board,
+      updated: Date.now(),
+      winner: winner,
+      finished: finished
+    }
+  }, { new: true })
 }
 
 const remove = async (_id) => {
@@ -33,7 +38,7 @@ const remove = async (_id) => {
 module.exports = {
   getAll,
   getById,
-  update,
   create,
+  update,
   remove
 }
