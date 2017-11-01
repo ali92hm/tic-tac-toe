@@ -1,7 +1,7 @@
-const MongoAdapter = require('./mongo-adapter').MongoAdapter
-
-const mongoDB = new MongoAdapter()
+const db = require('./db')
 
 module.exports = {
-  db: mongoDB
+  db: db
 }
+
+console.log(db)
