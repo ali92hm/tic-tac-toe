@@ -7,12 +7,19 @@ module.exports = (app) => {
   app.use('/api/echo', router)
 }
 
+/*
+* Handles all HTTP method api calls to /api/echo and echoes the passed params
+* @param {Object} req express req object
+* @param {Object} res express res object
+* @param {Object} next express next object
+*/
 router.all('/', (req, res, next) => {
-  if (!req.method) {
-    return util.handleRequestError(res)('No "method" was passed')
+  let errors = controller.requestValidatorIndex(req.method, req.query, req.body)
+  if (errors) {
+    return util.handleRequestError(res, errors)
   }
 
-  controller.echo(req.method, req.params, req.body)
+  controller.echo(req.method, req.query, req.body)
     .then(util.respondWithResult(res))
     .catch(util.handleInternalError(res))
 })
