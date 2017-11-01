@@ -1,6 +1,6 @@
 const echoController = require('../../app/controllers/echo')
 
-describe('requestValidatorIndex(method, query, body)', () => {
+describe('indexRequestValidator(method, query, body)', () => {
   var method
   var queryString
   var body
@@ -15,22 +15,22 @@ describe('requestValidatorIndex(method, query, body)', () => {
   })
 
   test('should undefined for complete params', () => {
-    expect(echoController.requestValidatorIndex(method, queryString, body))
+    expect(echoController.indexRequestValidator(method, queryString, body))
       .toBeUndefined()
   })
 
   test('should undefined for missing optional param queryString', () => {
-    expect(echoController.requestValidatorIndex(method, undefined, body))
+    expect(echoController.indexRequestValidator(method, undefined, body))
       .toBeUndefined()
   })
 
   test('should return error for missing method', () => {
-    expect(echoController.requestValidatorIndex(undefined, queryString, body))
+    expect(echoController.indexRequestValidator(undefined, queryString, body))
       .toEqual(['No "method" was passed.'])
   })
 
   test('should return error for wrong method', () => {
-    expect(echoController.requestValidatorIndex('SOMEMETHOD', queryString, body))
+    expect(echoController.indexRequestValidator('SOMEMETHOD', queryString, body))
       .toEqual(['"SOMEMETHOD" is not an allowed method.'])
   })
 })
@@ -51,6 +51,7 @@ describe('echo(method, query, body)', () => {
       body: body
     }
 
-    expect(echoController.echo(method, queryString, body)).resolves.toEqual(result)
+    expect(echoController.echoRequestHandler(method, queryString, body))
+      .resolves.toEqual(result)
   })
 })

@@ -12,7 +12,7 @@ const allowedMethods = {
 * @param {Object} body HTTP request body
 * @returns {[(string|Array)]} List of errors or undefined if there are no errors
 */
-const requestValidatorIndex = (method, query, body) => {
+const indexRequestValidator = (method, query, body) => {
   let errors = []
 
   if (!method) {
@@ -37,7 +37,7 @@ const requestValidatorIndex = (method, query, body) => {
 * @param {Object} body HTTP request body
 * @returns {Object}
 */
-const echo = async (method, query, body) => {
+const echoRequestHandler = async (method, query, body) => {
   let result = {
     message: `Recieved ${method}`,
     queryString: query,
@@ -48,6 +48,6 @@ const echo = async (method, query, body) => {
 }
 
 module.exports = {
-  requestValidatorIndex,
-  echo
+  indexRequestValidator,
+  echoRequestHandler
 }

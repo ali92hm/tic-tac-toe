@@ -14,12 +14,12 @@ module.exports = (app) => {
 * @param {Object} next express next object
 */
 router.all('/', (req, res, next) => {
-  let errors = controller.requestValidatorIndex(req.method, req.query, req.body)
+  let errors = controller.indexRequestValidator(req.method, req.query, req.body)
   if (errors) {
     return util.handleRequestError(res, errors)
   }
 
-  controller.echo(req.method, req.query, req.body)
+  controller.echoRequestHandler(req.method, req.query, req.body)
     .then(util.respondWithResult(res))
     .catch(util.handleInternalError(res))
 })
