@@ -23,14 +23,12 @@ exports.respondWithSuccess = (res, statusCode) => {
   }
 }
 
-exports.handleRequestError = (res, statusCode) => {
+exports.handleRequestError = (res, message, statusCode) => {
   statusCode = statusCode || 400
-  return (message) => {
-    return res.status(statusCode).send({
-      type: 'Bad request',
-      error: message
-    })
-  }
+  return res.status(statusCode).send({
+    type: 'Bad request',
+    error: message
+  })
 }
 
 exports.handleInternalError = (res, statusCode) => {
