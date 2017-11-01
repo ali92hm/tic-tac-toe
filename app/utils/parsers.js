@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const isUserRegx = /<@(U|W).+>/i
 
-const commandParser = (text) => {
+const parseCommand = (text) => {
   let output = {
     command: 'default',
     args: []
@@ -47,5 +47,5 @@ const normalizeString = (string) => {
 module.exports = {
   parseSlackUserId,
   normalizeString,
-  commandParser
+  parseCommand
 }

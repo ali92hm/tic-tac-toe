@@ -1,6 +1,6 @@
 const parser = require('../../app/utils/parsers')
 
-describe('commandParser(text)', () => {
+describe('parseCommand(text)', () => {
   var defaultRetrun
 
   beforeEach(() => {
@@ -11,35 +11,35 @@ describe('commandParser(text)', () => {
   })
 
   test('should return default command and empty array if text is undefined', () => {
-    expect(parser.commandParser()).toEqual(defaultRetrun)
+    expect(parser.parseCommand()).toEqual(defaultRetrun)
   })
 
   test('should return default command and empty array if text is empty', () => {
     let text = ''
-    expect(parser.commandParser(text)).toEqual(defaultRetrun)
+    expect(parser.parseCommand(text)).toEqual(defaultRetrun)
   })
 
   test('should return default command and empty array if text is white space', () => {
     let text = '  '
-    expect(parser.commandParser(text)).toEqual(defaultRetrun)
+    expect(parser.parseCommand(text)).toEqual(defaultRetrun)
   })
 
   test('should return command name and empty array if text is one word', () => {
     let text = 'someComMand'
     defaultRetrun.command = text.toLowerCase()
-    expect(parser.commandParser(text)).toEqual(defaultRetrun)
+    expect(parser.parseCommand(text)).toEqual(defaultRetrun)
   })
 
   test('should return command name and empty array if text is one word', () => {
     let text = 'somecommand'
     defaultRetrun.command = text
-    expect(parser.commandParser(text)).toEqual(defaultRetrun)
+    expect(parser.parseCommand(text)).toEqual(defaultRetrun)
   })
 
   test('should return command name and empty array if text is one word with any number of spaces', () => {
     let text = 'somecommand    '
     defaultRetrun.command = 'somecommand'
-    expect(parser.commandParser(text)).toEqual(defaultRetrun)
+    expect(parser.parseCommand(text)).toEqual(defaultRetrun)
   })
 
   test('should return command challege and array of userId', () => {
@@ -48,21 +48,21 @@ describe('commandParser(text)', () => {
       command: 'challege',
       args: ['@<@u7qp7apcl|username>']
     }
-    expect(parser.commandParser(text)).toEqual(expectedResult)
+    expect(parser.parseCommand(text)).toEqual(expectedResult)
   })
 
   test('should return command name and empty array if text is multiple words', () => {
     let text = 'somecommand arg1 ARG2 arg3 44 a - :: @<@U7QP7APCL|username>'
     defaultRetrun.command = 'somecommand'
     defaultRetrun.args = ['arg1', 'arg2', 'arg3', '44', 'a', '-', '::', '@<@u7qp7apcl|username>']
-    expect(parser.commandParser(text)).toEqual(defaultRetrun)
+    expect(parser.parseCommand(text)).toEqual(defaultRetrun)
   })
 
   test('should return command name and empty array if text is multiple words with any number of spaces', () => {
     let text = 'somecommand    aRg1 arg2 arg3        44    A'
     defaultRetrun.command = 'somecommand'
     defaultRetrun.args = ['arg1', 'arg2', 'arg3', '44', 'a']
-    expect(parser.commandParser(text)).toEqual(defaultRetrun)
+    expect(parser.parseCommand(text)).toEqual(defaultRetrun)
   })
 })
 
