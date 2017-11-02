@@ -1,18 +1,17 @@
 const _ = require('lodash')
+const config = require('config')
 const services = require('../services')
 
 const createGame = async (player1, player2) => {
   return services.db.game.create(player1, player2)
 }
 
-const getGame = (_id, populate) => {
+const getGame = (_id, populate = true) => {
   return services.db.game.getById(_id, populate)
 }
 
 const place = async (gameId, user, index) => {
-  console.log(user)
   let game = await getGame(gameId)
-  console.log('Retrieved game:', game)
 
   // // Ensure if userId is a player of this game
   if (!user.equals(game.xPlayer) && !user.equals(game.oPlayer)) {
@@ -31,13 +30,13 @@ const place = async (gameId, user, index) => {
   }
 
   // Place the move
-  game.board[index] = game.isXTurn ? 'x' : 'o'
+  game.board[index] = game.isXTurn ? config.get('game.xSymbole') : config.get('game.oSymbole')
   // Flip the turn
   game.isXTurn ^= true
   // Check for game status
   game.winner = whoIsWinner(game.board)
-  console.log('Saving game:', game)
-  return services.db.game.update(game._id, game.isXTurn, game.board, game.winner)
+  await services.db.game.update(game._id, game.isXTurn, game.board, game.winner)
+  return game
 }
 
 const whoIsWinner = (board) => {
@@ -67,7 +66,7 @@ const whoIsWinner = (board) => {
 
   // Board is full and no winner
   if (_.filter(board, (c) => { if (c) return c }).length === 9) {
-    return 'Draw'
+    return config.get('game.drawSymbole')
   }
 }
 
