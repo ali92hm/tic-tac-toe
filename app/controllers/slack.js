@@ -49,18 +49,21 @@ const tttRequestHandler = async (teamId, channelId, userId, text) => {
   teamId = parser.normalizeString(teamId)
   channelId = parser.normalizeString(channelId)
   userId = parser.normalizeString(userId)
+
+  let slackGame = await services.db.slackGame.getInProgress(teamId, channelId)
+  let user = await getOrCreateUser(teamId, userId)
   let {command, args} = parser.parseCommand(text)
 
   // TODO remove line
-  console.log('tttHandler', teamId, channelId, userId, command, args)
+  console.log('tttHandler', teamId, channelId, user, command, args)
 
   let output = unkownCommand(command)
   if (command === config.get('gameCommands.challenge')) {
-    output = await challenge(teamId, channelId, userId, args)
+    output = await challenge(teamId, channelId, slackGame, user, args)
   } else if (command === config.get('gameCommands.displayBoard')) {
-    output = await display(teamId, channelId)
+    output = await display(slackGame)
   } else if (command === config.get('gameCommands.place')) {
-    output = await place(teamId, channelId, userId, args)
+    output = await place(slackGame, user, args)
   } else if (command === config.get('gameCommands.default') ||
              command === config.get('gameCommands.help')) {
     output = helpMenue()
@@ -99,26 +102,28 @@ const helpMenue = () => {
   }
 }
 
-const challenge = async (teamId, channelId, userId, args) => {
-  // TODO remove line
-  console.log('challenge', args)
-  let opponentUserId = parser.parseSlackUserId(_.first(args))
-  if (!opponentUserId) {
-    return {error: 'No opponent specified. Please use `/ttt challenge @username`'}
-  }
-
-  if (userId === opponentUserId) {
-    return {error: 'You cant challenge yourself. Please pick someone else as opponent'}
-  }
-
+const challenge = async (teamId, channelId, slackGame, user, args) => {
   try {
-    let [user, opponentUser] = await Promise.all([
-      getOrCreateUser(teamId, userId),
-      getOrCreateUser(teamId, opponentUserId)
-    ])
+    if (slackGame) {
+      return {error: 'Already a game in progress for this channel'}
+    }
+    // TODO remove line
+    console.log('challenge', args)
+    let opponentUserId = parser.parseSlackUserId(_.first(args))
+    if (!opponentUserId) {
+      return {error: 'No opponent specified. Please use `/ttt challenge @username`'}
+    }
 
-    await services.db.slackGame.create(teamId, channelId, user._id, opponentUser._id)
-    return {text: `<@${userId}> (x) has challenge <@${opponentUserId}> (o) to a game of tick tack toe.\n`}
+    let opponentUser = await getOrCreateUser(teamId, opponentUserId)
+
+    if (user.equals(opponentUser)) {
+      return {error: 'You cant challenge yourself. Please pick someone else as opponent'}
+    }
+
+    let game = await gameController.createGame(user, opponentUser)
+    await services.db.slackGame.create(teamId, channelId, game)
+    // return {text: `<@${userId}> (x) has challenge <@${opponentUserId}> (o) to a game of tick tack toe.\n`}
+    return {text: renderForSalck(game.board)}
   } catch (error) {
     return {error: error.message}
   }
@@ -135,11 +140,7 @@ const renderForSalck = (board) => {
   return line + BACK_TICK_BLOCK
 }
 
-const display = async (teamId, channelId) => {
-  // TODO remove line
-  console.log('display', teamId, channelId)
-
-  let slackGame = await services.db.slackGame.getInProgress(teamId, channelId)
+const display = async (slackGame) => {
   if (!slackGame) {
     return {error: 'Opps no game in progress!!\n You can start one by saying `/ttt challenge @name`'}
   }
@@ -147,18 +148,20 @@ const display = async (teamId, channelId) => {
   return {text: renderForSalck(slackGame.game.board)}
 }
 
-const place = async (teamId, channelId, userId, args) => {
+const place = async (slackGame, user, args) => {
   // TODO remove line
-  console.log('place', teamId, channelId, userId, args)
+  console.log('place', user, args)
+  if (!slackGame) {
+    return {error: 'Opps no game in progress!!\n You can start one by saying `/ttt challenge @name`'}
+  }
+
   let index = parseInt(_.first(args))
   if (index < 1 || index > 9) {
     return {error: `${index} is not a valid number. Place take numbers between 1-9`}
   }
 
   try {
-    let user = await getOrCreateUser(teamId, userId)
-    let slackGame = await services.db.slackGame.getInProgress(teamId, channelId)
-    let game = await gameController.place(slackGame.game._id, user, index - 1)
+    let game = await gameController.place(slackGame.game, user, index - 1)
     let winnerText = ''
     if (game.winner) {
       winnerText = `\nYayy ${game.winner} is the winner`

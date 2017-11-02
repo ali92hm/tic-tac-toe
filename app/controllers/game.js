@@ -1,8 +1,8 @@
 const _ = require('lodash')
 const services = require('../services')
 
-const createGame = async (userId, opponetId) => {
-  return services.db.game.create(userId, opponetId)
+const createGame = async (player1, player2) => {
+  return services.db.game.create(player1, player2)
 }
 
 const getGame = (_id, populate) => {
