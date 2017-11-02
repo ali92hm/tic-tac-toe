@@ -5,7 +5,7 @@ describe('parseCommand(text)', () => {
 
   beforeEach(() => {
     defaultRetrun = {
-      command: 'default',
+      command: 'DEFAULT',
       args: []
     }
   })
@@ -26,42 +26,36 @@ describe('parseCommand(text)', () => {
 
   test('should return command name and empty array if text is one word', () => {
     let text = 'someComMand'
-    defaultRetrun.command = text.toLowerCase()
-    expect(parser.parseCommand(text)).toEqual(defaultRetrun)
-  })
-
-  test('should return command name and empty array if text is one word', () => {
-    let text = 'somecommand'
-    defaultRetrun.command = text
+    defaultRetrun.command = 'SOMECOMMAND'
     expect(parser.parseCommand(text)).toEqual(defaultRetrun)
   })
 
   test('should return command name and empty array if text is one word with any number of spaces', () => {
     let text = 'somecommand    '
-    defaultRetrun.command = 'somecommand'
+    defaultRetrun.command = 'SOMECOMMAND'
     expect(parser.parseCommand(text)).toEqual(defaultRetrun)
   })
 
-  test('should return command challege and array of userId', () => {
-    let text = 'challege @<@U7QP7APCL|username>'
+  test('should return command challenge and array of userId', () => {
+    let text = 'challenge @<@U7QP7APCL|username>'
     let expectedResult = {
-      command: 'challege',
-      args: ['@<@u7qp7apcl|username>']
+      command: 'CHALLENGE',
+      args: ['@<@U7QP7APCL|USERNAME>']
     }
     expect(parser.parseCommand(text)).toEqual(expectedResult)
   })
 
   test('should return command name and empty array if text is multiple words', () => {
     let text = 'somecommand arg1 ARG2 arg3 44 a - :: @<@U7QP7APCL|username>'
-    defaultRetrun.command = 'somecommand'
-    defaultRetrun.args = ['arg1', 'arg2', 'arg3', '44', 'a', '-', '::', '@<@u7qp7apcl|username>']
+    defaultRetrun.command = 'SOMECOMMAND'
+    defaultRetrun.args = ['ARG1', 'ARG2', 'ARG3', '44', 'A', '-', '::', '@<@U7QP7APCL|USERNAME>']
     expect(parser.parseCommand(text)).toEqual(defaultRetrun)
   })
 
   test('should return command name and empty array if text is multiple words with any number of spaces', () => {
     let text = 'somecommand    aRg1 arg2 arg3        44    A'
-    defaultRetrun.command = 'somecommand'
-    defaultRetrun.args = ['arg1', 'arg2', 'arg3', '44', 'a']
+    defaultRetrun.command = 'SOMECOMMAND'
+    defaultRetrun.args = ['ARG1', 'ARG2', 'ARG3', '44', 'A']
     expect(parser.parseCommand(text)).toEqual(defaultRetrun)
   })
 })
@@ -71,7 +65,7 @@ describe('parseSlackUserId(token)', () => {
   var userString
 
   beforeEach(() => {
-    userId = 'u7qp7apcl'
+    userId = 'U7QP7APCL'
     userString = '<@U7QP7APCL|username>'
   })
 
@@ -99,15 +93,15 @@ describe('parseSlackUserId(token)', () => {
 })
 
 describe('normalizeString(string)', () => {
-  test('should return a lowercase string without trailing empty spaces', () => {
-    let string = '   should RETURN a.   String. !'
-    let output = 'should return a.   string. !'
+  test('should return a uppercase string without trailing empty spaces', () => {
+    let string = '   should return a.   String. !1234'
+    let output = 'SHOULD RETURN A.   STRING. !1234'
     expect(parser.normalizeString(string)).toBe(output)
   })
 
-  test('should return a lowercase token without trailing empty spaces', () => {
-    let string = '  RETURN'
-    let output = 'return'
+  test('should return a uppercase token without trailing empty spaces', () => {
+    let string = '  return'
+    let output = 'RETURN'
     expect(parser.normalizeString(string)).toBe(output)
   })
 

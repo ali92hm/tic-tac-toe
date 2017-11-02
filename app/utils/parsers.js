@@ -3,7 +3,7 @@ const isUserRegx = /<@(U|W).+>/i
 
 const parseCommand = (text) => {
   let output = {
-    command: 'default',
+    command: 'DEFAULT',
     args: []
   }
 
@@ -41,7 +41,7 @@ const normalizeString = (string) => {
     return
   }
 
-  return string.trim().toLowerCase()
+  return string.trim().toUpperCase()
 }
 
 module.exports = {

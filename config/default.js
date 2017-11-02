@@ -18,10 +18,10 @@ module.exports = {
     }
   },
   gameCommands: {
-    displayBoard: 'display',
-    challenge: 'challenge',
-    place: 'place',
-    reset: 'reset',
-    help: 'help'
+    default: 'DEFAULT',
+    displayBoard: 'DISPLAY',
+    challenge: 'CHALLENGE',
+    place: 'PLACE',
+    help: 'HELP'
   }
 }

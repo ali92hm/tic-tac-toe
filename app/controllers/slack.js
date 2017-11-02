@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const config = require('config')
 const services = require('../services')
 const gameController = require('./game')
 const parser = require('../utils/parsers')
@@ -54,13 +55,14 @@ const tttRequestHandler = async (teamId, channelId, userId, text) => {
   console.log('tttHandler', teamId, channelId, userId, command, args)
 
   let output = unkownCommand(command)
-  if (command === 'challenge') {
+  if (command === config.get('gameCommands.challenge')) {
     output = await challenge(teamId, channelId, userId, args)
-  } else if (command === 'display') {
+  } else if (command === config.get('gameCommands.displayBoard')) {
     output = await display(teamId, channelId)
-  } else if (command === 'place') {
+  } else if (command === config.get('gameCommands.place')) {
     output = await place(teamId, channelId, userId, args)
-  } else if (command === 'help' || command === 'default') {
+  } else if (command === config.get('gameCommands.default') ||
+             command === config.get('gameCommands.help')) {
     output = helpMenue()
   }
 
