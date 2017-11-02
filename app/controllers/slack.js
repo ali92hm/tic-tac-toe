@@ -4,6 +4,7 @@ const services = require('../services')
 const gameController = require('./game')
 const parser = require('../utils/parsers')
 const formatters = require('../utils/formatters')
+const Errors = require('../utils/errors')
 const OUTLET = 'Slack'
 const BACK_TICK_BLOCK = '```'
 
@@ -94,16 +95,15 @@ const challenge = async (teamId, channelId, slackGame, user, args) => {
 
     let opponentUser = await getOrCreateUser(teamId, opponentUserId)
 
-    // Make sure opponent is not the user
-    if (user.equals(opponentUser)) {
-      return formatters.slackErrorFormatter(config.get('slack.messages.challengeSelf'))
-    }
-
     let game = await gameController.createGame(user, opponentUser)
     await services.db.slackGame.create(teamId, channelId, game)
     return render(game)
   } catch (error) {
-    return formatters.slackErrorFormatter(error.message)
+    if (error instanceof Errors.SamePlayersError) {
+      return formatters.slackErrorFormatter(config.get('slack.messages.challengeSelf'))
+    }
+
+    return formatters.slackErrorFormatter(['Oops, something went wrong.', error.message])
   }
 }
 
@@ -135,39 +135,50 @@ const place = async (slackGame, user, args) => {
     return formatters.slackErrorFormatter(config.get('slack.messages.noGameInProgress'))
   }
 
-  let index = parseInt(_.first(args))
-  if (!index || index < 1 || index > 9) {
-    return formatters.slackErrorFormatter([
-      `${index} is not a valid number.`,
-      'Place take numbers between 1-9'])
-  }
+  let move = _.first(args)
 
   let game
   try {
-    game = await gameController.place(slackGame.game, user, index - 1)
-  } catch (error) {
-    return formatters.slackErrorFormatter(error.message)
-  }
+    game = await gameController.place(slackGame.game, user, parseInt(move) - 1)
+    let response = []
+    response.push(BACK_TICK_BLOCK + formatters.boardAsciiFormatter(game.board) + BACK_TICK_BLOCK)
+    // If we have a winner
+    if (game.winner) {
+      if (game.winner === config.get('game.drawSymbole')) {
+        response.push('What a shame. The no one won the game')
+      } else {
+        let winner = game.winner === config.get('game.xSymbole') ? `<@${game.xPlayer.externalId}> (X)` : `<@${game.oPlayer.externalId}> (O)`
+        response.push(`${winner} won the game :tada:`)
+      }
 
-  let response = []
-  response.push(BACK_TICK_BLOCK + formatters.boardAsciiFormatter(game.board) + BACK_TICK_BLOCK)
-  // If we have a winner
-  if (game.winner) {
-    if (game.winner === config.get('game.drawSymbole')) {
-      response.push('What a shame. The no one won the game')
-    } else {
-      let winner = game.winner === config.get('game.xSymbole') ? `<@${game.xPlayer.externalId}> (X)` : `<@${game.oPlayer.externalId}> (O)`
-      response.push(`${winner} won the game :tada:`)
+      return formatters.slackResponseFormatter(response)
     }
 
+    // if we dont have a winner
+    let turn = game.isXTurn ? `<@${game.xPlayer.externalId}> (X)` : `<@${game.oPlayer.externalId}> (O)`
+    response.push(`It's ${turn}'s turn.`)
+    response.push('Type `/ttt place 1-9` to make a move.')
     return formatters.slackResponseFormatter(response)
-  }
+  } catch (error) {
+    let message = ['Oops, something went wrong.', error.message]
+    if (error instanceof Errors.WrongPlayerError) {
+      message = ['Sorry, you\'re not one of the players :expressionless:']
+    }
 
-  // if we dont have a winner
-  let turn = game.isXTurn ? `<@${game.xPlayer.externalId}> (X)` : `<@${game.oPlayer.externalId}> (O)`
-  response.push(`It's ${turn}'s turn.`)
-  response.push('Type `/ttt place 1-9` to make a move.')
-  return formatters.slackResponseFormatter(response)
+    if (error instanceof Errors.NotTurnError) {
+      message = ['It\'s not your turn :stuck_out_tongue_closed_eyes:']
+    }
+
+    if (error instanceof Errors.CellTakenError) {
+      message = [`Cell "${move}" already taken`]
+    }
+
+    if (error instanceof Errors.InvalidMove) {
+      message = [`"${move}" is not a valid number.`, 'Place numbers between 1-9']
+    }
+
+    return formatters.slackErrorFormatter(message)
+  }
 }
 
 const unkownCommand = (command) => {
