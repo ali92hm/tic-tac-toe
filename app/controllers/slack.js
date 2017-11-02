@@ -3,6 +3,7 @@ const config = require('config')
 const services = require('../services')
 const gameController = require('./game')
 const parser = require('../utils/parsers')
+const formatters = require('../utils/formatters')
 const OUTLET = 'Slack'
 const BACK_TICK_BLOCK = '```'
 
@@ -54,131 +55,131 @@ const tttRequestHandler = async (teamId, channelId, userId, text) => {
   let user = await getOrCreateUser(teamId, userId)
   let {command, args} = parser.parseCommand(text)
 
-  // TODO remove line
-  console.log('tttHandler', teamId, channelId, user, command, args)
-
-  let output = unkownCommand(command)
-  if (command === config.get('gameCommands.challenge')) {
-    output = await challenge(teamId, channelId, slackGame, user, args)
-  } else if (command === config.get('gameCommands.displayBoard')) {
-    output = await display(slackGame)
-  } else if (command === config.get('gameCommands.place')) {
-    output = await place(slackGame, user, args)
-  } else if (command === config.get('gameCommands.default') ||
-             command === config.get('gameCommands.help')) {
-    output = helpMenue()
+  // Command is help or empty
+  if (command === config.get('slack.commands.default') ||
+      command === config.get('slack.commands.help')) {
+    return helpMenue()
   }
 
-  return responseFormatter(output.text, output.attachments, output.error)
-}
-
-const responseFormatter = (text, attachments, error) => {
-  let response = {
-    text: text,
-    attachments: attachments,
-    response_type: 'in_channel'
+  // Command is challenge
+  if (command === config.get('slack.commands.challenge')) {
+    return challenge(teamId, channelId, slackGame, user, args)
   }
 
-  if (error) {
-    delete response.response_type
-    response.text = error
+  // command is display board
+  if (command === config.get('slack.commands.displayBoard')) {
+    return display(slackGame)
   }
 
-  return response
-}
-
-const unkownCommand = (command) => {
-  return {
-    error: `Opps \`${command}\` is not a command.\n Type \`/ttt help\` to see the avalible options.`
+  // command is place board
+  if (command === config.get('slack.commands.place')) {
+    return place(slackGame, user, args)
   }
-}
 
-const helpMenue = () => {
-  return {
-    text: ['Hello!! Welcome to Tic-Tac-Toe slack slash game.',
-      'You can start a game by typing `/ttt challenge @name`',
-      'You see the current ongoing game by typing `/ttt display`',
-      'If it\'s your turn to play you can say `/ttt place 1-9`'].join('\n')
-  }
+  return unkownCommand(text)
 }
 
 const challenge = async (teamId, channelId, slackGame, user, args) => {
+  // Game in progress for this channel
+  if (slackGame) {
+    return formatters.slackErrorFormatter(config.get('slack.messages.gameInProgress'))
+  }
+
   try {
-    if (slackGame) {
-      return {error: 'Already a game in progress for this channel'}
-    }
-    // TODO remove line
-    console.log('challenge', args)
     let opponentUserId = parser.parseSlackUserId(_.first(args))
+    // Make sure there is an opponent
     if (!opponentUserId) {
-      return {error: 'No opponent specified. Please use `/ttt challenge @username`'}
+      return formatters.slackErrorFormatter(config.get('slack.messages.noOpponent'))
     }
 
     let opponentUser = await getOrCreateUser(teamId, opponentUserId)
 
+    // Make sure opponent is not the user
     if (user.equals(opponentUser)) {
-      return {error: 'You cant challenge yourself. Please pick someone else as opponent'}
+      return formatters.slackErrorFormatter(config.get('slack.messages.challengeSelf'))
     }
 
     let game = await gameController.createGame(user, opponentUser)
     await services.db.slackGame.create(teamId, channelId, game)
-    // return {text: `<@${userId}> (x) has challenge <@${opponentUserId}> (o) to a game of tick tack toe.\n`}
-    return {text: renderBoard(game.board)}
+    return render(game)
   } catch (error) {
-    return {error: error.message}
+    return formatters.slackErrorFormatter(error.message)
   }
-}
-
-const renderBoard = (board) => {
-  for (let i = 0; i < board.length; i++) {
-    board[i] = board[i] || (i + 1)
-  }
-  let [ v1, v2, v3, v4, v5, v6, v7, v8, v9 ] = board
-
-  let template = `
-  +---+---+---+
-  | ${v1} | ${v2} | ${v3} |
-  |---+---+---|
-  | ${v4} | ${v5} | ${v6} |
-  |---+---+---|
-  | ${v7} | ${v8} | ${v9} |
-  +---+---+---+
-  `
-
-  return BACK_TICK_BLOCK + template + BACK_TICK_BLOCK
 }
 
 const display = async (slackGame) => {
   if (!slackGame) {
-    return {error: 'Opps no game in progress!!\nYou can start one by saying `/ttt challenge @name`'}
+    return formatters.slackErrorFormatter(config.get('slack.messages.noGameInProgress'))
   }
-  console.log(slackGame)
-  let text = slackGame.game.xPlayer + '\n' + renderBoard(slackGame.game.board)
-  return {text: text}
+
+  try {
+    let fullGame = await gameController.getGame(slackGame.game)
+    return render(fullGame)
+  } catch (error) {
+    return formatters.slackErrorFormatter(error.message)
+  }
+}
+
+const render = (game) => {
+  let response = []
+  response.push(`<@${game.xPlayer.externalId}> (X) :vs: <@${game.oPlayer.externalId}> (O)`)
+  response.push(BACK_TICK_BLOCK + formatters.boardAsciiFormatter(game.board) + BACK_TICK_BLOCK)
+  let turn = game.isXTurn ? `<@${game.xPlayer.externalId}> (X)` : `<@${game.oPlayer.externalId}> (O)`
+  response.push(`It's ${turn}'s turn.`)
+  response.push('Type `/ttt place 1-9` to make a move.')
+  return formatters.slackResponseFormatter(response)
 }
 
 const place = async (slackGame, user, args) => {
-  // TODO remove line
-  console.log('place', user, args)
   if (!slackGame) {
-    return {error: 'Opps no game in progress!!\nYou can start one by saying `/ttt challenge @name`'}
+    return formatters.slackErrorFormatter(config.get('slack.messages.noGameInProgress'))
   }
 
   let index = parseInt(_.first(args))
   if (!index || index < 1 || index > 9) {
-    return {error: `${index} is not a valid number. Place take numbers between 1-9`}
+    return formatters.slackErrorFormatter([
+      `${index} is not a valid number.`,
+      'Place take numbers between 1-9'])
   }
 
+  let game
   try {
-    let game = await gameController.place(slackGame.game, user, index - 1)
-    let winnerText = ''
-    if (game.winner) {
-      winnerText = `\nYayy ${game.winner} is the winner`
-    }
-    return {text: renderBoard(game.board) + winnerText}
+    game = await gameController.place(slackGame.game, user, index - 1)
   } catch (error) {
-    return {'error': error.message}
+    return formatters.slackErrorFormatter(error.message)
   }
+
+  let response = []
+  response.push(BACK_TICK_BLOCK + formatters.boardAsciiFormatter(game.board) + BACK_TICK_BLOCK)
+  // If we have a winner
+  if (game.winner) {
+    if (game.winner === config.get('game.drawSymbole')) {
+      response.push('What a shame. The no one won the game')
+    } else {
+      let winner = game.winner === config.get('game.xSymbole') ? `<@${game.xPlayer.externalId}> (X)` : `<@${game.oPlayer.externalId}> (O)`
+      response.push(`${winner} won the game :tada:`)
+    }
+
+    return formatters.slackResponseFormatter(response)
+  }
+
+  // if we dont have a winner
+  let turn = game.isXTurn ? `<@${game.xPlayer.externalId}> (X)` : `<@${game.oPlayer.externalId}> (O)`
+  response.push(`It's ${turn}'s turn.`)
+  response.push('Type `/ttt place 1-9` to make a move.')
+  return formatters.slackResponseFormatter(response)
+}
+
+const unkownCommand = (command) => {
+  let message = [
+    `Opps \`${command}\` is not a command.`,
+    'Type `/ttt help` to see the available options.']
+
+  return formatters.slackErrorFormatter(message)
+}
+
+const helpMenue = () => {
+  return formatters.slackResponseFormatter(config.get('slack.messages.helpMessage'))
 }
 
 module.exports = {
