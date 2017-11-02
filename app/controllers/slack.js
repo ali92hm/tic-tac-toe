@@ -4,6 +4,7 @@ const services = require('../services')
 const gameController = require('./game')
 const parser = require('../utils/parsers')
 const OUTLET = 'Slack'
+const BACK_TICK_BLOCK = '```'
 
 const tttRequestValidator = (body) => {
   let errors = []
@@ -35,7 +36,6 @@ const getOrCreateUser = async (teamId, userId) => {
     let uniqueId = `${OUTLET}|${teamId}|${userId}`
     let user = await services.db.users.getByUniqueId(uniqueId)
     if (!user) {
-      console.log('need to create one')
       // Fetch users info from Slack
       user = await services.db.users.create(uniqueId, userId, OUTLET)
     }
@@ -98,7 +98,7 @@ const helpMenue = () => {
     text: ['Hello!! Welcome to Tic-Tac-Toe slack slash game.',
       'You can start a game by typing `/ttt challenge @name`',
       'You see the current ongoing game by typing `/ttt display`',
-      'If it\'s your turn to play you can say `/ttt place`'].join('\n')
+      'If it\'s your turn to play you can say `/ttt place 1-9`'].join('\n')
   }
 }
 
@@ -123,40 +123,49 @@ const challenge = async (teamId, channelId, slackGame, user, args) => {
     let game = await gameController.createGame(user, opponentUser)
     await services.db.slackGame.create(teamId, channelId, game)
     // return {text: `<@${userId}> (x) has challenge <@${opponentUserId}> (o) to a game of tick tack toe.\n`}
-    return {text: renderForSalck(game.board)}
+    return {text: renderBoard(game.board)}
   } catch (error) {
     return {error: error.message}
   }
 }
 
-const renderForSalck = (board) => {
-  const BACK_TICK_BLOCK = '```'
-
-  let line = BACK_TICK_BLOCK
-  for (var i = 0; i < board.length; i++) {
-    line += (board[i] || ' ') + ((i % 3 === 2) ? '\n' : ' | ')
+const renderBoard = (board) => {
+  for (let i = 0; i < board.length; i++) {
+    board[i] = board[i] || (i + 1)
   }
+  let [ v1, v2, v3, v4, v5, v6, v7, v8, v9 ] = board
 
-  return line + BACK_TICK_BLOCK
+  let template = `
+  +---+---+---+
+  | ${v1} | ${v2} | ${v3} |
+  |---+---+---|
+  | ${v4} | ${v5} | ${v6} |
+  |---+---+---|
+  | ${v7} | ${v8} | ${v9} |
+  +---+---+---+
+  `
+
+  return BACK_TICK_BLOCK + template + BACK_TICK_BLOCK
 }
 
 const display = async (slackGame) => {
   if (!slackGame) {
-    return {error: 'Opps no game in progress!!\n You can start one by saying `/ttt challenge @name`'}
+    return {error: 'Opps no game in progress!!\nYou can start one by saying `/ttt challenge @name`'}
   }
-
-  return {text: renderForSalck(slackGame.game.board)}
+  console.log(slackGame)
+  let text = slackGame.game.xPlayer + '\n' + renderBoard(slackGame.game.board)
+  return {text: text}
 }
 
 const place = async (slackGame, user, args) => {
   // TODO remove line
   console.log('place', user, args)
   if (!slackGame) {
-    return {error: 'Opps no game in progress!!\n You can start one by saying `/ttt challenge @name`'}
+    return {error: 'Opps no game in progress!!\nYou can start one by saying `/ttt challenge @name`'}
   }
 
   let index = parseInt(_.first(args))
-  if (index < 1 || index > 9) {
+  if (!index || index < 1 || index > 9) {
     return {error: `${index} is not a valid number. Place take numbers between 1-9`}
   }
 
@@ -166,7 +175,7 @@ const place = async (slackGame, user, args) => {
     if (game.winner) {
       winnerText = `\nYayy ${game.winner} is the winner`
     }
-    return {text: renderForSalck(game.board) + winnerText}
+    return {text: renderBoard(game.board) + winnerText}
   } catch (error) {
     return {'error': error.message}
   }
