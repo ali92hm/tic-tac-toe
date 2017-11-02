@@ -23,6 +23,7 @@ module.exports = {
     drawSymbole: 'Draw'
   },
   slack: {
+    reqToken: process.env.SLACK_REQ_TOKEN,
     commands: {
       default: 'DEFAULT',
       displayBoard: 'DISPLAY',

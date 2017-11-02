@@ -2,9 +2,10 @@ const express = require('express')
 const router = express.Router()
 const util = require('../utils/response')
 const controller = require('../controllers/slack')
+const auth = require('../auth/slack')
 
 module.exports = (app) => {
-  app.use('/api/slack', router)
+  app.use('/api/slack', auth.verifySlackToken, router)
 }
 
 /*
