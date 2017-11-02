@@ -4,8 +4,16 @@ const getAll = () => {
   return Game.find().populate('xPlayer').populate('oPlayer').exec()
 }
 
-const getById = (_id) => {
-  return Game.findById(_id).populate('xPlayer').populate('oPlayer').exec()
+const getById = (_id, populate) => {
+  let query = Game.findById(_id)
+
+  if (populate) {
+    query
+      .populate('xPlayer')
+      .populate('oPlayer')
+  }
+
+  return query.exec()
 }
 
 const create = (xPlayer, oPlayer) => {

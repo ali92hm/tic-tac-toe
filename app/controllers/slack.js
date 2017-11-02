@@ -1,6 +1,8 @@
 const _ = require('lodash')
+const services = require('../services')
 const gameController = require('./game')
 const parser = require('../utils/parsers')
+const OUTLET = 'Slack'
 
 const tttRequestValidator = (body) => {
   let errors = []
@@ -27,10 +29,22 @@ const tttRequestValidator = (body) => {
   }
 }
 
-const tttRequestHandler = async (teamId, channelId, userId, text) => {
-  // TODO remove line
-  console.log('tttHandler', teamId, channelId, userId, text)
+const getOrCreateUser = async (teamId, userId) => {
+  try {
+    let uniqueId = `${OUTLET}|${teamId}|${userId}`
+    let user = await services.db.users.getByUniqueId(uniqueId)
+    if (!user) {
+      console.log('need to create one')
+      // Fetch users info from Slack
+      user = await services.db.users.create(uniqueId, userId, OUTLET)
+    }
+    return user
+  } catch (error) {
+    console.error(error)
+  }
+}
 
+const tttRequestHandler = async (teamId, channelId, userId, text) => {
   teamId = parser.normalizeString(teamId)
   channelId = parser.normalizeString(channelId)
   userId = parser.normalizeString(userId)
@@ -40,7 +54,6 @@ const tttRequestHandler = async (teamId, channelId, userId, text) => {
   console.log('tttHandler', teamId, channelId, userId, command, args)
 
   let output = unkownCommand(command)
-
   if (command === 'challenge') {
     output = await challenge(teamId, channelId, userId, args)
   } else if (command === 'display') {
@@ -51,7 +64,6 @@ const tttRequestHandler = async (teamId, channelId, userId, text) => {
     output = helpMenue()
   }
 
-  console.log(output)
   return responseFormatter(output.text, output.attachments, output.error)
 }
 
@@ -86,23 +98,28 @@ const helpMenue = () => {
 }
 
 const challenge = async (teamId, channelId, userId, args) => {
-  var result = {}
   // TODO remove line
   console.log('challenge', args)
-
-  var opponentUserId = parser.parseSlackUserId(_.first(args))
+  let opponentUserId = parser.parseSlackUserId(_.first(args))
   if (!opponentUserId) {
-    result.error = 'No opponent specified. Please use `/ttt challenge @username`'
-    return result
+    return {error: 'No opponent specified. Please use `/ttt challenge @username`'}
   }
 
   if (userId === opponentUserId) {
-    result.error = 'You cant challenge yourself. Please pick someone else as opponent'
-    return result
+    return {error: 'You cant challenge yourself. Please pick someone else as opponent'}
   }
 
-  let game = await gameController.createGame(teamId, channelId, userId, opponentUserId)
-  return {text: renderForSalck(game.board)}
+  try {
+    let [user, opponentUser] = await Promise.all([
+      getOrCreateUser(teamId, userId),
+      getOrCreateUser(teamId, opponentUserId)
+    ])
+
+    await services.db.slackGame.create(teamId, channelId, user._id, opponentUser._id)
+    return {text: `<@${userId}> (x) has challenge <@${opponentUserId}> (o) to a game of tick tack toe.\n`}
+  } catch (error) {
+    return {error: error.message}
+  }
 }
 
 const renderForSalck = (board) => {
@@ -119,8 +136,13 @@ const renderForSalck = (board) => {
 const display = async (teamId, channelId) => {
   // TODO remove line
   console.log('display', teamId, channelId)
-  let game = await gameController.getGame(channelId)
-  return {text: renderForSalck(game.board)}
+
+  let slackGame = await services.db.slackGame.getInProgress(teamId, channelId)
+  if (!slackGame) {
+    return {error: 'Opps no game in progress!!\n You can start one by saying `/ttt challenge @name`'}
+  }
+
+  return {text: renderForSalck(slackGame.game.board)}
 }
 
 const place = async (teamId, channelId, userId, args) => {
@@ -132,9 +154,9 @@ const place = async (teamId, channelId, userId, args) => {
   }
 
   try {
-    console.log('a')
-    let game = await gameController.place(teamId, channelId, userId, index - 1)
-    console.log('b')
+    let user = await getOrCreateUser(teamId, userId)
+    let slackGame = await services.db.slackGame.getInProgress(teamId, channelId)
+    let game = await gameController.place(slackGame.game._id, user, index - 1)
     let winnerText = ''
     if (game.winner) {
       winnerText = `\nYayy ${game.winner} is the winner`
