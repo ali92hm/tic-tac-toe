@@ -1,32 +1,44 @@
-const _ = require('lodash')
 const config = require('config')
 const services = require('../services')
+const Errors = require('../utils/errors')
 
 const createGame = async (player1, player2) => {
+  if (!player1 || !player2) {
+    throw new Errors.NoPlayerError(`Player1 ${player1} and/or Player2 ${player2} are not valid players`)
+  }
+
+  if (player1.equals(player2)) {
+    throw new Errors.SamePlayersError(`Player1 ${player1} and Player2 ${player2} are the same user`)
+  }
+
   return services.db.game.create(player1, player2)
 }
 
-const getGame = (_id, populate = true) => {
-  return services.db.game.getById(_id, populate)
+const getGame = (_id) => {
+  return services.db.game.getById(_id, true)
 }
 
 const place = async (gameId, user, index) => {
   let game = await getGame(gameId)
 
-  // // Ensure if userId is a player of this game
+  // Ensure user is a player of this game
   if (!user.equals(game.xPlayer) && !user.equals(game.oPlayer)) {
-    throw new Error('Sorry you\'re not one of the players :expressionless:')
+    throw new Errors.WrongPlayerError(`User ${user} is not a part of this game`)
   }
 
-  // // Ensure its userId's turn
+  // Ensure it's user's turn
   if ((game.isXTurn && !user.equals(game.xPlayer)) ||
       (!game.isXTurn && !user.equals(game.oPlayer))) {
-    throw new Error('Its not your turn yet')
+    throw new Errors.NotTurnError(`Its not ${user} turn`)
+  }
+
+  if (!index || isNaN(index) || index < 0 || index > game.board.length - 1) {
+    throw new Errors.InvalidMove(`${index} is not a valid index`)
   }
 
   // Ensure Cell is not empty
   if (game.board[index]) {
-    throw new Error('Cell already taken')
+    throw new Errors.CellTakenError(`Cell ${index} aready taken`)
   }
 
   // Place the move
@@ -34,12 +46,13 @@ const place = async (gameId, user, index) => {
   // Flip the turn
   game.isXTurn ^= true
   // Check for game status
-  game.winner = whoIsWinner(game.board)
+  game.winner = getWinner(game.board)
+  // TODO: Make update return the game
   await services.db.game.update(game._id, game.isXTurn, game.board, game.winner)
   return game
 }
 
-const whoIsWinner = (board) => {
+const getWinner = (board) => {
   for (let i = 0; i < 3; i++) {
     // col check
     if (board[i] && board[i] === board[i + 3] && board[i] === board[i + 6]) {
@@ -53,7 +66,7 @@ const whoIsWinner = (board) => {
     }
   }
 
-  // diag check
+  // diagonal check
   let i = 0
   if (board[i] && board[i] === board[i + 4] && board[i] === board[i + 4 + 4]) {
     return board[i]
@@ -65,7 +78,7 @@ const whoIsWinner = (board) => {
   }
 
   // Board is full and no winner
-  if (_.filter(board, (c) => { if (c) return c }).length === 9) {
+  if (board.indexOf(undefined) === -1) {
     return config.get('game.drawSymbole')
   }
 }
