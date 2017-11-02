@@ -1,64 +1,56 @@
 const _ = require('lodash')
 const services = require('../services')
 
-const createGame = async (teamId, channelId, userId, opponetId) => {
-  console.log('createGame', teamId, channelId, userId, opponetId)
-
-  return services.db.createGame(teamId, channelId, userId, opponetId)
+const createGame = async (userId, opponetId) => {
+  return services.db.game.create(userId, opponetId)
 }
 
-const getGame = (channelId) => {
-  return services.db.getGameByChannelId(channelId)
+const getGame = (_id, populate) => {
+  return services.db.game.getById(_id, populate)
 }
 
-const place = async (teamId, channelId, userId, index) => {
-  let game = await getGame(channelId)
-  console.log(game)
+const place = async (gameId, user, index) => {
+  console.log(user)
+  let game = await getGame(gameId)
+  console.log('Retrieved game:', game)
 
   // // Ensure if userId is a player of this game
-  if (userId !== game.xUser && userId !== game.yUser) {
-    throw new Error('Sorry youre not one of the player :expressionless:')
+  if (!user.equals(game.xPlayer) && !user.equals(game.oPlayer)) {
+    throw new Error('Sorry you\'re not one of the players :expressionless:')
   }
 
   // // Ensure its userId's turn
-  if (game.isXTurn) {
-    if (userId !== game.xUser) {
-      throw new Error('Its not your turn yet')
-    }
-  } else if (userId !== game.yUser) {
+  if ((game.isXTurn && !user.equals(game.xPlayer)) ||
+      (!game.isXTurn && !user.equals(game.oPlayer))) {
     throw new Error('Its not your turn yet')
   }
 
-  // CELL IS NOT EMPTY
+  // Ensure Cell is not empty
   if (game.board[index]) {
     throw new Error('Cell already taken')
   }
 
-  if (game.isXTurn) {
-    game.board[index] = 'x'
-  } else {
-    game.board[index] = 'o'
-  }
-
+  // Place the move
+  game.board[index] = game.isXTurn ? 'x' : 'o'
+  // Flip the turn
   game.isXTurn ^= true
-
-  let winner = whoIsWinner(game.board)
-  game.winner = winner
-  await services.db.updateGame(game._id, game.isXTurn, game.board, winner)
-  return game
+  // Check for game status
+  game.winner = whoIsWinner(game.board)
+  console.log('Saving game:', game)
+  return services.db.game.update(game._id, game.isXTurn, game.board, game.winner)
 }
 
 const whoIsWinner = (board) => {
   for (let i = 0; i < 3; i++) {
-    let j = i * 3
-    // row check
-    if (board[j] && board[j] === board[j + 1] && board[j] === board[j + 2]) {
-      return board[j]
-    }
-
     // col check
     if (board[i] && board[i] === board[i + 3] && board[i] === board[i + 6]) {
       return board[i]
+    }
+
+    // row check
+    let j = i * 3
+    if (board[j] && board[j] === board[j + 1] && board[j] === board[j + 2]) {
+      return board[j]
     }
   }
 
@@ -73,7 +65,7 @@ const whoIsWinner = (board) => {
     return board[i]
   }
 
-  // Draw
+  // Board is full and no winner
   if (_.filter(board, (c) => { if (c) return c }).length === 9) {
     return 'Draw'
   }
