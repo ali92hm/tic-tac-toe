@@ -26,7 +26,11 @@ module.exports = {
     drawSymbole: 'Draw'
   },
   slack: {
+    baseApiUrl: 'https://slack.com/api',
     reqToken: process.env.SLACK_REQ_TOKEN,
+    devBearerToken: process.env.SLACK_DEV_BEARER_TOKEN,
+    clientId: process.env.SLACK_CLIENT_ID,
+    secret: process.env.SLACK_SECRET,
     commands: {
       default: 'DEFAULT',
       displayBoard: 'DISPLAY',
