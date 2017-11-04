@@ -16,6 +16,10 @@ const slackResponseFormatter = (text, attachments, error, join = '\n') => {
   return response
 }
 
+const slackUserMention = (userId) => {
+  return `<@${userId}>`
+}
+
 const boardAsciiFormatter = (board) => {
   for (let i = 0; i < board.length; i++) {
     board[i] = board[i] || (i + 1)
@@ -41,5 +45,6 @@ const slackErrorFormatter = (messages, join = '\n') => {
 module.exports = {
   slackResponseFormatter,
   boardAsciiFormatter,
+  slackUserMention,
   slackErrorFormatter
 }
