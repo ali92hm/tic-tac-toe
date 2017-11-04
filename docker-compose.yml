@@ -2,7 +2,7 @@ version: '3'
 services:
 # Tick tack toe
   tic-tac-toe:
-    image: node:carbon-apline
+    image: node:carbon-alpine
     working_dir: /usr/src
     volumes:
       - .:/usr/src

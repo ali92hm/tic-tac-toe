@@ -1,4 +1,4 @@
-FROM node:carbon-apline
+FROM node:carbon-alpine
 
 # Setting the working directory
 WORKDIR /usr/src/
