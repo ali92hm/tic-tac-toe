@@ -3,7 +3,7 @@ const config = require('config')
 const verifySlackToken = (req, res, next) => {
   let token = req.body.token
   if (!token || !isvalidToken(token)) {
-    return res.status(403)
+    return res.status(403).send({message: 'No auth or wrong token'})
   }
   next()
 }
