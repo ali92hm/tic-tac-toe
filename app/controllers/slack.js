@@ -38,8 +38,10 @@ const getOrCreateUser = async (teamId, userId) => {
     let uniqueId = `${OUTLET}|${teamId}|${userId}`
     let user = await services.db.users.getByUniqueId(uniqueId)
     if (!user) {
-      // Fetch users info from Slack
-      user = await services.db.users.create(uniqueId, userId, OUTLET)
+      // Fetch user info from slack
+      let slackUser = await services.slack.api.getUserInfo(teamId, userId)
+      user = await services.db.users.create(uniqueId, userId, OUTLET,
+        slackUser.email, slackUser.firstName, slackUser.lastName)
     }
     return user
   } catch (error) {
