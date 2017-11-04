@@ -1,6 +1,5 @@
 const glob = require('glob')
 const path = require('path')
-const logger = require('morgan')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const compress = require('compression')
@@ -10,7 +9,6 @@ module.exports = (app, config) => {
   app.locals.ENV = config.get('env')
   app.locals.ENV_DEVELOPMENT = config.get('isProduction')
 
-  app.use(logger('dev'))
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({
     extended: true

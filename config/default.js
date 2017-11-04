@@ -17,6 +17,9 @@ module.exports = {
       }
     }
   },
+  winston: {
+    logLevel: process.env.WINSTON_LOG_LEVEL || 'verbose'
+  },
   game: {
     xSymbole: 'X',
     oSymbole: 'O',
