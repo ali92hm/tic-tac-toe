@@ -1,22 +1,16 @@
 const Game = require('./models/games')
 
-const getAll = () => {
-  return Game.find().populate('xPlayer').populate('oPlayer').exec()
+const getAll = (full = true) => {
+  let query = Game.find()
+  return populate(query, populate).exec()
 }
 
-const getById = (_id, populate) => {
+const getById = (_id, full = true) => {
   let query = Game.findById(_id)
-
-  if (populate) {
-    query
-      .populate('xPlayer')
-      .populate('oPlayer')
-  }
-
-  return query.exec()
+  return populate(query, populate).exec()
 }
 
-const create = (xPlayer, oPlayer) => {
+const create = (xPlayer, oPlayer, full = true) => {
   return Game.create({
     xPlayer: xPlayer,
     oPlayer: oPlayer,
@@ -26,21 +20,32 @@ const create = (xPlayer, oPlayer) => {
   })
 }
 
-const update = (_id, isXTurn, board, winner) => {
-  let finished = winner ? Date.now() : undefined
-  return Game.findByIdAndUpdate(_id, {
+const update = (_id, isXTurn, board, winner, full = true) => {
+  let query = Game.findByIdAndUpdate(_id, {
     $set: {
       isXTurn: isXTurn,
       board: board,
       updated: Date.now(),
       winner: winner,
-      finished: finished
+      finished: winner ? Date.now() : undefined
     }
   }, { new: true })
+
+  return populate(query, populate).exec()
 }
 
 const remove = async (_id) => {
   return Game.remove({ _id: _id })
+}
+
+const populate = (query, full) => {
+  if (populate) {
+    query
+      .populate('xPlayer')
+      .populate('oPlayer')
+  }
+
+  return query
 }
 
 module.exports = {
