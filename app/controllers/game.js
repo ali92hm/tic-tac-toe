@@ -47,9 +47,7 @@ const place = async (gameId, user, index) => {
   game.isXTurn ^= true
   // Check for game status
   game.winner = getWinner(game.board)
-  // TODO: Make update return the game
-  await services.db.game.update(game._id, game.isXTurn, game.board, game.winner)
-  return game
+  return services.db.game.update(game._id, game.isXTurn, game.board, game.winner)
 }
 
 const getWinner = (board) => {
