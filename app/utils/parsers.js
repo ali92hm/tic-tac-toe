@@ -1,9 +1,9 @@
 const _ = require('lodash')
 const isUserRegx = /<@(U|W).+>/i
 
-const parseCommand = (text) => {
+const parseCommand = (text, defaultCommand = '') => {
   let output = {
-    command: 'DEFAULT',
+    command: defaultCommand,
     args: []
   }
 
