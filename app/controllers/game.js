@@ -35,7 +35,7 @@ const place = async (gameId, user, index) => {
   // Make sure index is not out of bounds
   if (index === undefined || index === null || isNaN(index) ||
        index < 0 || index > game.board.length - 1) {
-    throw new Errors.InvalidMove(`${index} is not a valid index`)
+    throw new Errors.InvalidMoveError(`${index} is not a valid index`)
   }
 
   // Ensure Cell is not empty
