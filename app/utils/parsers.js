@@ -1,10 +1,11 @@
 const _ = require('lodash')
 const Errors = require('./errors')
 const isUserRegx = /<@(U|W).+>/i
+const isWholeIntRegx = /^-?\d+$/i
 
 const parseCommand = (text, defaultCommand = '') => {
   let output = {
-    command: defaultCommand,
+    command: defaultCommand.toUpperCase(),
     args: []
   }
 
@@ -40,6 +41,10 @@ const parseSlackUserId = (token) => {
 }
 
 const getOnlyItem = (array) => {
+  if (!Array.isArray(array)) {
+    throw new Errors.ArgumentError(`"${array}" is not an array`)
+  }
+
   if (array.length !== 1) {
     throw new Errors.ArgumentError('More than one argument was passed')
   }
@@ -48,8 +53,7 @@ const getOnlyItem = (array) => {
 }
 
 const parseWholeNumber = (string) => {
-  // TODO: Turn this into regex
-  if (string.indexOf('.') !== -1) {
+  if (!isWholeIntRegx.test(string)) {
     throw new Errors.NotIntegerError(`"${string}" is not a whole number`)
   }
 

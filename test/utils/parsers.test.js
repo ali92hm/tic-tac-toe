@@ -1,11 +1,12 @@
 const parser = require('../../app/utils/parsers')
+const Errors = require('../../app/utils/Errors')
 
 describe('parseCommand(text)', () => {
   var defaultRetrun
 
   beforeEach(() => {
     defaultRetrun = {
-      command: 'DEFAULT',
+      command: '',
       args: []
     }
   })
@@ -17,6 +18,12 @@ describe('parseCommand(text)', () => {
   test('should return default command and empty array if text is empty', () => {
     let text = ''
     expect(parser.parseCommand(text)).toEqual(defaultRetrun)
+  })
+
+  test('should return passed default command and empty array if text is empty', () => {
+    let text = ''
+    defaultRetrun.command = 'MYCOMMAND'
+    expect(parser.parseCommand(text, 'MyCommand')).toEqual(defaultRetrun)
   })
 
   test('should return default command and empty array if text is white space', () => {
@@ -78,17 +85,53 @@ describe('parseSlackUserId(token)', () => {
     expect(parser.parseSlackUserId(userString)).toBe(userId)
   })
 
-  test('should return undefined if token empty string', () => {
-    expect(parser.parseSlackUserId('')).toBeUndefined()
+  test('should throw SlackNotUserIdError if token is empty string', () => {
+    let fn = () => { parser.parseSlackUserId('') }
+    expect(fn).toThrow(Errors.SlackNotUserIdError)
   })
 
-  test('should return undefined if token is undefined', () => {
-    expect(parser.parseSlackUserId()).toBeUndefined()
+  test('should throw SlackNotUserIdError if token is undefined', () => {
+    let fn = () => { parser.parseSlackUserId('') }
+    expect(fn).toThrow(Errors.SlackNotUserIdError)
   })
 
-  test('should return undefined if token is not a user string', () => {
-    userString = 'sdlf@<23df>||'
-    expect(parser.parseSlackUserId(userString)).toBeUndefined()
+  test('should throw SlackNotUserIdError if token is not a user string', () => {
+    let fn = () => { parser.parseSlackUserId('sdlf@<23df>||') }
+    expect(fn).toThrow(Errors.SlackNotUserIdError)
+  })
+})
+
+describe('getOnlyItem(array)', () => {
+  var obj
+  beforeEach(() => {
+    obj = {
+      string: 'text1',
+      bool: true,
+      int: 34
+    }
+  })
+
+  test('should return a the only string in array', () => {
+    expect(parser.getOnlyItem([obj.string])).toBe(obj.string)
+  })
+
+  test('should return a the only object in array', () => {
+    expect(parser.getOnlyItem([obj])).toEqual(obj)
+  })
+
+  test('should throw ArgumentError if array has more than 1 item', () => {
+    let fn = () => { parser.getOnlyItem([obj, obj]) }
+    expect(fn).toThrow(Errors.ArgumentError)
+  })
+
+  test('should throw ArgumentError if object if not array', () => {
+    let fn = () => { parser.getOnlyItem(obj) }
+    expect(fn).toThrow(Errors.ArgumentError)
+  })
+
+  test('should throw ArgumentError if array is empty', () => {
+    let fn = () => { parser.getOnlyItem([]) }
+    expect(fn).toThrow(Errors.ArgumentError)
   })
 })
 
@@ -101,13 +144,25 @@ describe('parseWholeNumber(string)', () => {
     expect(parser.parseWholeNumber('-234')).toBe(-234)
   })
 
-  // test('should return undefined if token empty string', () => {
-  //   expect(parser.parseWholeNumber('')).toBeUndefined()
-  // })
+  test('should throw NotIntegerError if string has decimal point', () => {
+    let fn = () => { parser.parseWholeNumber('1.45') }
+    expect(fn).toThrow(Errors.NotIntegerError)
+  })
 
-  // test('should return undefined if token is undefined', () => {
-  //   expect(parser.parseWholeNumber()).toBeUndefined()
-  // })
+  test('should throw NotIntegerError if string non number', () => {
+    let fn = () => { parser.parseWholeNumber('a2134') }
+    expect(fn).toThrow(Errors.NotIntegerError)
+  })
+
+  test('should throw NotIntegerError if string empty string', () => {
+    let fn = () => { parser.parseWholeNumber('') }
+    expect(fn).toThrow(Errors.NotIntegerError)
+  })
+
+  test('should throw NotIntegerError if string is undefined', () => {
+    let fn = () => { parser.parseWholeNumber() }
+    expect(fn).toThrow(Errors.NotIntegerError)
+  })
 })
 
 describe('normalizeString(string)', () => {
