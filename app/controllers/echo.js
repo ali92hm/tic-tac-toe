@@ -7,10 +7,10 @@ const allowedMethods = {
 
 /*
 * Validates parameters for echo "/" api
-* @param {string} method HTTP method name
-* @param {Object} query HTTP parsed query string
-* @param {Object} body HTTP request body
-* @returns {[(string|Array)]} List of errors or undefined if there are no errors
+* @param {string} method - HTTP method name
+* @param {Object} query - HTTP parsed query string
+* @param {Object} body - HTTP request body
+* @returns {[(string|Array)]} - List of errors or undefined if there are no errors
 */
 const indexRequestValidator = (method, query, body) => {
   let errors = []
@@ -32,9 +32,9 @@ const indexRequestValidator = (method, query, body) => {
 
 /*
 * Echoes a request method, query sting and body back
-* @param {string} method HTTP method name
-* @param {Object} query HTTP parsed query string
-* @param {Object} body HTTP request body
+* @param {string} method - HTTP method name
+* @param {Object} query - HTTP parsed query string
+* @param {Object} body - HTTP request body
 * @returns {Object}
 */
 const echoRequestHandler = async (method, query, body) => {

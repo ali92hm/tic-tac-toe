@@ -30,7 +30,7 @@ const getInProgress = async (teamId, channelId) => {
 
 const create = async (teamId, channelId, game) => {
   if (await getInProgress(teamId, channelId)) {
-    throw new Errors.SlacGameInProgress(`There is already a game in progress
+    throw new Errors.SlackGameInProgress(`There is already a game in progress
       for team ${teamId} and channel ${channelId}`)
   }
 

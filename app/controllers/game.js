@@ -2,6 +2,12 @@ const config = require('config')
 const services = require('../services')
 const Errors = require('../utils/errors')
 
+/*
+* Creates a tic tac toe game
+* @param {Object} player1 - Mongoose User object for player 1
+* @param {Object} player2 - Mongoose User object for player 2
+* @returns {Object} game - Mongoose object for game
+*/
 const createGame = (player1, player2) => {
   if (!player1 || !player2) {
     throw new Errors.NoPlayerError(`Player1 ${player1} and/or Player2 ${player2} are not valid players`)
@@ -14,12 +20,23 @@ const createGame = (player1, player2) => {
   return services.db.game.create(player1, player2)
 }
 
+/*
+* Retrieves a tic tac toe game
+* @param {string} _id - _id for a game object
+* @returns {Object} game - Mongoose object for game
+*/
 const getGame = (_id) => {
   return services.db.game.getById(_id)
 }
 
-const place = async (gameId, user, index) => {
-  let game = await getGame(gameId)
+/*
+* Places a move for a player
+* @param {string} _id - _id for a game object
+* @param {Object} user - Mongoose User object for player taking action
+* @returns {Object} game - Mongoose object for updated game
+*/
+const place = async (_id, user, index) => {
+  let game = await getGame(_id)
 
   // Ensure user is a player of this game
   if (!user.equals(game.xPlayer) && !user.equals(game.oPlayer)) {
@@ -52,6 +69,11 @@ const place = async (gameId, user, index) => {
   return services.db.game.update(game._id, game.isXTurn, game.board, game.winner)
 }
 
+/*
+* Checks to see if there is a winner or game has ended
+* @param {[(string|Array)]} board - array for game board
+* @returns {string} winner - Returns constant strings for winner (x,o,draw)
+*/
 const getWinner = (board) => {
   for (let i = 0; i < 3; i++) {
     // col check
@@ -72,6 +94,7 @@ const getWinner = (board) => {
     return board[i]
   }
 
+  // reverse diagonal check
   i = 2
   if (board[i] && board[i] === board[i + 2] && board[i] === board[i + 2 + 2]) {
     return board[i]

@@ -10,9 +10,9 @@ module.exports = (app) => {
 
 /*
 * Handles POST calls to /api/slack/ttt
-* @param {Object} req express req object
-* @param {Object} res express res object
-* @param {Object} next express next object
+* @param {Object} req - express req object
+* @param {Object} res - express res object
+* @param {Object} next - express next object
 */
 router.post('/ttt', (req, res, next) => {
   let fields = req.body

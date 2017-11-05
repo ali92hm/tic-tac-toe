@@ -9,9 +9,9 @@ module.exports = (app) => {
 
 /*
 * Handles all HTTP method api calls to /api/echo and echoes the passed params
-* @param {Object} req express req object
-* @param {Object} res express res object
-* @param {Object} next express next object
+* @param {Object} req - express req object
+* @param {Object} res - express res object
+* @param {Object} next - express next object
 */
 router.all('/', (req, res, next) => {
   let errors = controller.indexRequestValidator(req.method, req.query, req.body)

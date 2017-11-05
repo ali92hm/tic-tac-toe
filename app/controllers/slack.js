@@ -7,6 +7,11 @@ const parser = require('../utils/parsers')
 const formatter = require('../utils/formatters')
 const Errors = require('../utils/errors')
 
+/*
+* Validates parameters for ttt "/slack/ttt" api
+* @param {Object} body - Body if the http method
+* @returns {[(string|Array)]} - List of errors or undefined if there are no errors
+*/
 const tttRequestValidator = (body) => {
   let errors = []
   let requiredFields = {
@@ -32,6 +37,14 @@ const tttRequestValidator = (body) => {
   }
 }
 
+/*
+* /slack/ttt request handler
+* @param {string} teamId - slack request teamId
+* @param {string} channelId - slack request channelId
+* @param {string} userId - slack request userId
+* @param {string} text - slack request text
+* @returns {string} message - resulting message
+*/
 const tttRequestHandler = async (teamId, channelId, userId, text) => {
   winston.verbose('tttRequestHandler', teamId, channelId, userId, text)
   teamId = parser.normalizeString(teamId)
@@ -43,7 +56,7 @@ const tttRequestHandler = async (teamId, channelId, userId, text) => {
     // Command is help or empty
     if (command === config.get('slack.commands.default') ||
         command === config.get('slack.commands.help')) {
-      return helpMenue()
+      return helpMenu()
     }
 
     // Command is challenge
@@ -67,6 +80,14 @@ const tttRequestHandler = async (teamId, channelId, userId, text) => {
   }
 }
 
+/*
+* Handles the challenge command - Creates a game for a channel if one doesn't exist
+* @param {string} teamId - normalizeString teamId
+* @param {string} channelId - normalizeStringt channelId
+* @param {string} userId - normalizeString userId
+* @param {[(string|Array)]} args - list of command arguments. Should contain only 1 slack mention string
+* @returns {string} message - resulting message: mention players + board + mention whose turn + instructions
+*/
 const challenge = async (teamId, channelId, userId, args) => {
   winston.verbose('challenge', teamId, channelId, userId, args)
   // Registering or retrieving users
@@ -82,6 +103,12 @@ const challenge = async (teamId, channelId, userId, args) => {
   return formatter.slackResponseFormatter(result)
 }
 
+/*
+* Handles the display command - renders a game if exits
+* @param {string} teamId - normalizeString teamId
+* @param {string} channelId - normalizeStringt channelIds
+* @returns {string} message - resulting message: mention players + board + mention whose turn + instructions
+*/
 const display = async (teamId, channelId) => {
   winston.verbose('display', teamId, channelId)
   // get the in progress game
@@ -93,6 +120,14 @@ const display = async (teamId, channelId) => {
   return formatter.slackResponseFormatter(result)
 }
 
+/*
+* Handles the place command - make a move for a userId
+* @param {string} teamId - normalizeString teamId
+* @param {string} channelId - normalizeStringt channelId
+* @param {string} userId - normalizeString userId
+* @param {[(string|Array)]} args - list of command arguments. Should contain only 1 integer string
+* @returns {string} message - resulting message: board + winners or mention whose turn + instructions
+*/
 const place = async (teamId, channelId, userId, args) => {
   winston.verbose('place', teamId, channelId, userId, args)
   // Get index from args
@@ -108,95 +143,136 @@ const place = async (teamId, channelId, userId, args) => {
   return formatter.slackResponseFormatter(result)
 }
 
-const helpMenue = () => {
+/*
+* Handles default (empty) and help command - shows help menu
+* @returns {string} message - help menu
+*/
+const helpMenu = () => {
   return formatter.slackResponseFormatter(config.get('slack.messages.helpMessage'))
 }
 
+/*
+* Handles Errors based on the type of the error
+* @param {Error} error - custom or system error object
+* @param {string} originalText - The original text sent by slack
+* @returns {string} message - help menu
+*/
 const handleError = (error, originalText) => {
   winston.info(error, originalText)
 
+  // Handle Unknown Errors and show help command
   if (error instanceof Errors.SlackUknownCommandError) {
     return formatter.slackErrorFormatter([
       `Opps, \`${originalText}\` is not a command.`,
       'Type `/ttt help` to see the available options.'])
   }
 
+  // Handle Argument error - when user passes less or more arguments to a command
   if (error instanceof Errors.ArgumentError) {
     return formatter.slackErrorFormatter([
       `Invalid number of agruments was passed to \`/ttt ${originalText}\``,
       'Type `/ttt help` to see the available options.'])
   }
 
+  // Handle SlackNotUserIdError - when mentions are not actual users
   if (error instanceof Errors.SlackNotUserIdError) {
     return formatter.slackErrorFormatter([error.message,
       'Please try selecting someone using `@username`'])
   }
 
-  if (error instanceof Errors.SlacGameInProgress) {
+  // Handles SlackGameInProgress - when there is a game in progress for a given channel in a team
+  if (error instanceof Errors.SlackGameInProgress) {
     return formatter.slackErrorFormatter(config.get('slack.messages.gameInProgress'))
   }
 
+  // Handles SlackNoGameInProgress - when there is no game in progress for a given channel in a team
+  if (error instanceof Errors.SlacNoGameInProgress) {
+    return formatter.slackErrorFormatter(config.get('slack.messages.gameInProgress'))
+  }
+
+  // Handles SamePlayersError - when a user challenges themselves
   if (error instanceof Errors.SamePlayersError) {
     return formatter.slackErrorFormatter(config.get('slack.messages.challengeSelf'))
   }
 
-  // if (!slackGame) {
-  //   return formatter.slackErrorFormatter(config.get('slack.messages.noGameInProgress'))
-  // }
-
+  // Handles WrongPlayerError - when a user tries to make a move on a game they are not apart of
   if (error instanceof Errors.WrongPlayerError) {
     return formatter.slackErrorFormatter('Sorry, you\'re not one of the players :expressionless:')
   }
 
+  // Handles NotTurnError - when a user tries to make a move when it's not their turn
   if (error instanceof Errors.NotTurnError) {
     return formatter.slackErrorFormatter('It\'s not your turn :stuck_out_tongue_closed_eyes:')
   }
 
+  // Handles CellTakenError - when a user selects a board position that is already filled
   if (error instanceof Errors.CellTakenError) {
     return formatter.slackErrorFormatter(`Cell "${originalText}" already taken`)
   }
 
-  if (error instanceof Errors.InvalidMove) {
+  // Handles CellTakenError - when a user tries to make a move with wrong parameter
+  // (i.e string, negative number, floating point number)
+  if (error instanceof Errors.InvalidMoveError) {
     return formatter.slackErrorFormatter([`"${originalText}" is not a valid number.`,
       'Place numbers between 1-9'])
   }
 
+  // Unknown error or system error
   winston.error(error, originalText)
   return formatter.slackErrorFormatter('Oops, something went wrong.')
 }
 
+/*
+* Finds or registers a user a user given teamId and userId
+* @param {string} teamId - normalizeString teamId
+* @param {string} userId - normalizeString userId
+* @returns {Object} user - Mongoose User object
+*/
 const getOrCreateUser = async (teamId, userId) => {
   let outlet = config.get('slack.outletName')
+  // Form the unique id for slack users
   let uniqueId = `${outlet}|${teamId}|${userId}`
   let user = await services.db.users.getByUniqueId(uniqueId)
   // Create a user if no user is found
   if (!user) {
     // Fetch user info from slack
     let slackUser = await services.slack.api.getUserInfo(teamId, userId)
-    // Create a user
     user = await services.db.users.create(uniqueId, userId, outlet,
         slackUser.email, slackUser.firstName, slackUser.lastName)
   }
   return user
 }
 
+/*
+* Render a game for slack
+* @param {Object} game - Mongoose Game object
+* @param {boolean} mentionPlayer - slack mention the players of this game
+* @param {boolean} mentionTurn - slack mention whose turn it is
+* @param {boolean} hint - give hint on how to place next move
+* @returns {[(string|Array)]} response - list of messages to be send to user
+*/
 const render = (game, mentionPlayer, mentionTurn, hint) => {
   let response = []
+
+  // Get players string in from: <@userId> (X or O)
   let xPlayerMention = formatter.slackUserMention(game.xPlayer.externalId) +
     ` (${config.get('game.xSymbole')})`
   let oPlayerMention = formatter.slackUserMention(game.oPlayer.externalId) +
     ` (${config.get('game.oSymbole')})`
 
+  // Mention players if mentionPlayer is true
   if (mentionPlayer) {
     response.push(`${xPlayerMention} :vs: ${oPlayerMention}`)
   }
 
+  // Render board
   response.push(formatter.BACK_TICK_BLOCK +
     formatter.boardAsciiFormatter(game.board) +
     formatter.BACK_TICK_BLOCK)
 
   // If we have a winner
   if (game.winner) {
+    // Game was a draw
     if (game.winner === config.get('game.drawSymbole')) {
       response.push('What a shame. No one won the game :scream:')
     } else {
@@ -207,11 +283,11 @@ const render = (game, mentionPlayer, mentionTurn, hint) => {
 
   // If don't have a winner
   if (!game.winner) {
-    // Mention whose turn it is
+    // Mention whose turn it is if mentionTurn is true
     if (mentionTurn) {
       response.push(`It's ${game.isXTurn ? xPlayerMention : oPlayerMention}'s turn.`)
     }
-    // Mention give user hint
+    // Mention give user hint if hint is true
     if (hint) {
       response.push('Type `/ttt place 1-9` to make a move.')
     }
