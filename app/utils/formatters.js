@@ -1,3 +1,5 @@
+const BACK_TICK_BLOCK = '```'
+
 const slackResponseFormatter = (text, attachments, error, join = '\n') => {
   if (Array.isArray(text)) {
     text = text.join(join)
@@ -43,6 +45,7 @@ const slackErrorFormatter = (messages, join = '\n') => {
 }
 
 module.exports = {
+  BACK_TICK_BLOCK,
   slackResponseFormatter,
   boardAsciiFormatter,
   slackUserMention,
