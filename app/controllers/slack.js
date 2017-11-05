@@ -184,13 +184,13 @@ const handleError = (error, originalText) => {
       'Please try selecting someone using `@username`'])
   }
 
-  // Handles SlackGameInProgress - when there is a game in progress for a given channel in a team
-  if (error instanceof Errors.SlackGameInProgress) {
+  // Handles SlackGameInProgressError - when there is a game in progress for a given channel in a team
+  if (error instanceof Errors.SlackGameInProgressError) {
     return formatter.slackErrorFormatter(config.get('slack.messages.gameInProgress'))
   }
 
-  // Handles SlackNoGameInProgress - when there is no game in progress for a given channel in a team
-  if (error instanceof Errors.SlacNoGameInProgress) {
+  // Handles SlacNoGameInProgressError - when there is no game in progress for a given channel in a team
+  if (error instanceof Errors.SlacNoGameInProgressError) {
     return formatter.slackErrorFormatter(config.get('slack.messages.gameInProgress'))
   }
 

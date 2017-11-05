@@ -99,7 +99,7 @@ class SlackError extends Error {
   }
 }
 
-class SlackGameInProgress extends SlackError {
+class SlackAPIError extends SlackError {
   constructor (message) {
     super(message)
     this.name = this.constructor.name
@@ -108,7 +108,16 @@ class SlackGameInProgress extends SlackError {
   }
 }
 
-class SlackNoGameInProgress extends SlackError {
+class SlackGameInProgressError extends SlackError {
+  constructor (message) {
+    super(message)
+    this.name = this.constructor.name
+
+    Error.captureStackTrace(this, this.constructor)
+  }
+}
+
+class SlacNoGameInProgressError extends SlackError {
   constructor (message) {
     super(message)
     this.name = this.constructor.name
@@ -144,8 +153,9 @@ module.exports = {
   NotIntegerError,
   NotTurnError,
   SamePlayersError,
-  SlackGameInProgress,
-  SlackNoGameInProgress,
+  SlackAPIError,
+  SlackGameInProgressError,
+  SlacNoGameInProgressError,
   SlackNotUserIdError,
   SlackUknownCommandError,
   WrongPlayerError
