@@ -1,18 +1,19 @@
 const _ = require('lodash')
 const SlackGame = require('./models/slack-game')
 
-const getAll = () => {
-  return SlackGame.find().populate('game').exec()
+const getAll = (full = true) => {
+  let query = SlackGame.find()
+  return populate(query, populate).exec()
 }
 
-const getById = (_id) => {
-  return SlackGame.findById(_id).populate('game').exec()
+const getById = (_id, full = true) => {
+  let query = SlackGame.findById(_id)
+  return populate(query, populate).exec()
 }
 
-const findByQuery = (query) => {
-  return SlackGame.find(query)
-    .populate('game')
-    .exec()
+const findByQuery = (criteria, full = true) => {
+  let query = SlackGame.find(criteria)
+  return populate(query, populate).exec()
 }
 
 // God, why does mongo not have joins
@@ -39,12 +40,21 @@ const create = async (teamId, channelId, game) => {
 }
 
 // TODO: Implement update slack game
-const update = (_id, fields) => {
+const update = (_id, fields, full = true) => {
   throw new Error('Not implemented')
 }
 
 const remove = (_id) => {
   return SlackGame.remove({ _id: _id }).exec()
+}
+
+const populate = (query, full) => {
+  if (populate) {
+    query
+      .populate('game')
+  }
+
+  return query
 }
 
 module.exports = {
