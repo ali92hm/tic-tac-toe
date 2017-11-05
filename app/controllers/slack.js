@@ -39,11 +39,12 @@ const tttRequestValidator = (body) => {
 
 /*
 * /slack/ttt request handler
+* @async
 * @param {string} teamId - slack request teamId
 * @param {string} channelId - slack request channelId
 * @param {string} userId - slack request userId
 * @param {string} text - slack request text
-* @returns {string} message - resulting message
+* @returns {Promise<string>} message - resulting message
 */
 const tttRequestHandler = async (teamId, channelId, userId, text) => {
   winston.verbose('tttRequestHandler', teamId, channelId, userId, text)
@@ -82,11 +83,12 @@ const tttRequestHandler = async (teamId, channelId, userId, text) => {
 
 /*
 * Handles the challenge command - Creates a game for a channel if one doesn't exist
+* @async
 * @param {string} teamId - normalizeString teamId
 * @param {string} channelId - normalizeStringt channelId
 * @param {string} userId - normalizeString userId
 * @param {[(string|Array)]} args - list of command arguments. Should contain only 1 slack mention string
-* @returns {string} message - resulting message: mention players + board + mention whose turn + instructions
+* @returns {Promise<string>} message - resulting message: mention players + board + mention whose turn + instructions
 */
 const challenge = async (teamId, channelId, userId, args) => {
   winston.verbose('challenge', teamId, channelId, userId, args)
@@ -105,9 +107,10 @@ const challenge = async (teamId, channelId, userId, args) => {
 
 /*
 * Handles the display command - renders a game if exits
+* @async
 * @param {string} teamId - normalizeString teamId
 * @param {string} channelId - normalizeStringt channelIds
-* @returns {string} message - resulting message: mention players + board + mention whose turn + instructions
+* @returns {Promise<string>} message - resulting message: mention players + board + mention whose turn + instructions
 */
 const display = async (teamId, channelId) => {
   winston.verbose('display', teamId, channelId)
@@ -122,11 +125,12 @@ const display = async (teamId, channelId) => {
 
 /*
 * Handles the place command - make a move for a userId
+* @async
 * @param {string} teamId - normalizeString teamId
 * @param {string} channelId - normalizeStringt channelId
 * @param {string} userId - normalizeString userId
 * @param {[(string|Array)]} args - list of command arguments. Should contain only 1 integer string
-* @returns {string} message - resulting message: board + winners or mention whose turn + instructions
+* @returns {Promise<string>} message - resulting message: board + winners or mention whose turn + instructions
 */
 const place = async (teamId, channelId, userId, args) => {
   winston.verbose('place', teamId, channelId, userId, args)
@@ -224,9 +228,10 @@ const handleError = (error, originalText) => {
 
 /*
 * Finds or registers a user a user given teamId and userId
+* @async
 * @param {string} teamId - normalizeString teamId
 * @param {string} userId - normalizeString userId
-* @returns {Object} user - Mongoose User object
+* @returns {Promise<User>} user - Mongoose User object
 */
 const getOrCreateUser = async (teamId, userId) => {
   let outlet = config.get('slack.outletName')

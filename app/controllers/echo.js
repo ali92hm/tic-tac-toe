@@ -32,10 +32,11 @@ const indexRequestValidator = (method, query, body) => {
 
 /*
 * Echoes a request method, query sting and body back
+* @async
 * @param {string} method - HTTP method name
 * @param {Object} query - HTTP parsed query string
 * @param {Object} body - HTTP request body
-* @returns {Object}
+* @returns {Promise<Object>}
 */
 const echoRequestHandler = async (method, query, body) => {
   let result = {

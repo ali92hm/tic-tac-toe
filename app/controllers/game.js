@@ -4,9 +4,10 @@ const Errors = require('../utils/errors')
 
 /*
 * Creates a tic tac toe game
+* @async
 * @param {Object} player1 - Mongoose User object for player 1
 * @param {Object} player2 - Mongoose User object for player 2
-* @returns {Object} game - Mongoose object for game
+* @returns {Promise<Game>} game - Mongoose object for game
 */
 const createGame = (player1, player2) => {
   if (!player1 || !player2) {
@@ -22,8 +23,9 @@ const createGame = (player1, player2) => {
 
 /*
 * Retrieves a tic tac toe game
+* @async
 * @param {string} _id - _id for a game object
-* @returns {Object} game - Mongoose object for game
+* @returns {Promise<Game>} game - Mongoose object for game
 */
 const getGame = (_id) => {
   return services.db.game.getById(_id)
@@ -31,9 +33,10 @@ const getGame = (_id) => {
 
 /*
 * Places a move for a player
+* @async
 * @param {string} _id - _id for a game object
 * @param {Object} user - Mongoose User object for player taking action
-* @returns {Object} game - Mongoose object for updated game
+* @returns {Promise<Game>} game - Mongoose object for updated game
 */
 const place = async (_id, user, index) => {
   let game = await getGame(_id)
