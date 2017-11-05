@@ -27,6 +27,7 @@ module.exports = {
   },
   slack: {
     baseApiUrl: 'https://slack.com/api',
+    outletName: 'SLACK',
     reqToken: process.env.SLACK_REQ_TOKEN,
     devBearerToken: process.env.SLACK_DEV_BEARER_TOKEN,
     clientId: process.env.SLACK_CLIENT_ID,
@@ -39,7 +40,7 @@ module.exports = {
       help: 'HELP'
     },
     messages: {
-      noGameInProgress: ['Oops no game in progress!!', 'You can start one by saying `/ttt challenge @name`'],
+      noGameInProgress: ['Oops, no game in progress!!', 'You can start one by saying `/ttt challenge @name`'],
       gameInProgress: ['There is a game in progress for this channel :cry:', 'Please try another channel'],
       noOpponent: ['No opponent specified.', 'Please use `/ttt challenge @username`'],
       challengeSelf: ['You cant challenge yourself.', 'Please pick someone else as opponent'],
