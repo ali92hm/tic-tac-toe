@@ -92,6 +92,24 @@ describe('parseSlackUserId(token)', () => {
   })
 })
 
+describe('parseWholeNumber(string)', () => {
+  test('should return a positive integer', () => {
+    expect(parser.parseWholeNumber('234')).toBe(234)
+  })
+
+  test('should return a negative integer', () => {
+    expect(parser.parseWholeNumber('-234')).toBe(-234)
+  })
+
+  // test('should return undefined if token empty string', () => {
+  //   expect(parser.parseWholeNumber('')).toBeUndefined()
+  // })
+
+  // test('should return undefined if token is undefined', () => {
+  //   expect(parser.parseWholeNumber()).toBeUndefined()
+  // })
+})
+
 describe('normalizeString(string)', () => {
   test('should return a uppercase string without trailing empty spaces', () => {
     let string = '   should return a.   String. !1234'
