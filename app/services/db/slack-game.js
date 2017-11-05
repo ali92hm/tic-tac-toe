@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const SlackGame = require('./models/slack-game')
+const Errors = require('../../utils/errors')
 
 const getAll = (full = true) => {
   let query = SlackGame.find()
@@ -29,7 +30,8 @@ const getInProgress = async (teamId, channelId) => {
 
 const create = async (teamId, channelId, game) => {
   if (await getInProgress(teamId, channelId)) {
-    throw new Error('Game in progress')
+    throw new Errors.SlacGameInProgress(`There is already a game in progress
+      for team ${teamId} and channel ${channelId}`)
   }
 
   return SlackGame.create({
