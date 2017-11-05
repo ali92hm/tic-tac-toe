@@ -2,7 +2,7 @@ const config = require('config')
 const services = require('../services')
 const Errors = require('../utils/errors')
 
-const createGame = async (player1, player2) => {
+const createGame = (player1, player2) => {
   if (!player1 || !player2) {
     throw new Errors.NoPlayerError(`Player1 ${player1} and/or Player2 ${player2} are not valid players`)
   }
@@ -15,7 +15,7 @@ const createGame = async (player1, player2) => {
 }
 
 const getGame = (_id) => {
-  return services.db.game.getById(_id, true)
+  return services.db.game.getById(_id)
 }
 
 const place = async (gameId, user, index) => {
@@ -32,6 +32,7 @@ const place = async (gameId, user, index) => {
     throw new Errors.NotTurnError(`Its not ${user} turn`)
   }
 
+  // Make sure index is not out of bounds
   if (!index || isNaN(index) || index < 0 || index > game.board.length - 1) {
     throw new Errors.InvalidMove(`${index} is not a valid index`)
   }
