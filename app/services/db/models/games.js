@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
+/*
+* Mongoose Schema for Game
+*/
 const GameSchema = new Schema({
   xPlayer: {
     type: Schema.Types.ObjectId,

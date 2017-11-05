@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
+/*
+* Mongoose Schema for SlackGame
+*/
 const SlackGameSchema = new Schema({
   teamId: {
     type: String,
