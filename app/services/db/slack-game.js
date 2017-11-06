@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const SlackGame = require('./models/slack-game')
-const gameService = require('./game')
+const gameController = require('../../controllers/game')
 const Errors = require('../../utils/errors')
 
 /*
@@ -53,7 +53,7 @@ const getInProgress = async (teamId, channelId) => {
   }
 
   // Retrieve the full populated object
-  inProgressGame.game = await gameService.getById(inProgressGame.game, true)
+  inProgressGame.game = await gameController.getGame(inProgressGame.game)
   return inProgressGame
 }
 
@@ -89,7 +89,7 @@ const create = async (teamId, channelId, user, opponent) => {
       for team ${teamId} and channel ${channelId}`)
   }
 
-  let game = await gameService.create(user, opponent)
+  let game = await gameController.createGame(user, opponent)
   return SlackGame.create({
     teamId: teamId,
     channelId: channelId,
