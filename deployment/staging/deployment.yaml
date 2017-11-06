@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ttt-staging
+  namespace: ttt
+spec:
+  replicas: 1
+  progressDeadlineSeconds: 100
+  template:
+    metadata:
+      labels:
+        name: ttt
+        environment: staging
+        app: express
+    spec:
+      containers:
+        - name: ttt
+          image: gcr.io/slack-184501/tic-tac-toe:latest
+          imagePullPolicy: Always
+          env:
+          - name: NODE_ENV
+            value: "production"
+          - name: SLACK_CLIENT_ID
+            value: "xxx"
+          - name: SLACK_SECRET
+            value: "xxx"
+          - name: SLACK_DEV_BEARER_TOKEN
+            value: "xxx"
+          - name: SLACK_REQ_TOKEN
+            value: "xxx"
+          - name: MONGODB_URI
+            value: "mongodb://db-mongodb/staging"
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
