@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const SlackGame = require('./models/slack-game')
-const gameController = require('../../controllers/game')
+const gameService = require('./game')
 const Errors = require('../../utils/errors')
 
 /*
@@ -53,7 +53,7 @@ const getInProgress = async (teamId, channelId) => {
   }
 
   // Retrieve the full populated object
-  inProgressGame.game = await gameController.getGame(inProgressGame.game)
+  inProgressGame.game = await gameService.getById(inProgressGame.game)
   return inProgressGame
 }
 
@@ -84,12 +84,20 @@ const _getInProgress = async (teamId, channelId) => {
 * @returns {Promise<SlackGame>} slackGame - mongoose slackGame object
 */
 const create = async (teamId, channelId, user, opponent) => {
+  if (!user || !opponent) {
+    throw new Errors.NoPlayerError(`Player1 ${user} and/or Player2 ${opponent} are not valid players`)
+  }
+
+  if (user.equals(opponent)) {
+    throw new Errors.SamePlayersError(`Player1 ${user} and Player2 ${opponent} are the same user`)
+  }
+
   if (await _getInProgress(teamId, channelId)) {
     throw new Errors.SlackGameInProgressError(`There is already a game in progress
       for team ${teamId} and channel ${channelId}`)
   }
 
-  let game = await gameController.createGame(user, opponent)
+  let game = await gameService.create(user, opponent)
   return SlackGame.create({
     teamId: teamId,
     channelId: channelId,
