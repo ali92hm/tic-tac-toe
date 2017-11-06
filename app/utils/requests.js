@@ -1,5 +1,15 @@
 const request = require('request')
 
+/*
+* Wrapper for making web requests
+* @async
+* @param {string} method - web request method (GET, POST, PUT, etc.)
+* @param {string} url - url for the api
+* @param {Object} form - web form fields
+* @param {string} [token] - bearer token
+* @param {string} [contentType] - request contentType
+* @returns {Promise<Object>} result - result of the web request
+*/
 const requestManager = (method, url, form, token, contentType = 'application/x-www-form-urlencoded') => {
   let options = {}
   options.method = method
@@ -16,6 +26,12 @@ const requestManager = (method, url, form, token, contentType = 'application/x-w
   return makeRequest(options)
 }
 
+/*
+* Wrapper over request
+* @async
+* @param {Object} options - request options for web request
+* @returns {Promise<Object>} result - result of the web request
+*/
 const makeRequest = (options) => {
   return new Promise((resolve, reject) => {
     request(options, (error, response) => {
