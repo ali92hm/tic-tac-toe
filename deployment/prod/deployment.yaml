@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: ttt
-          image: gcr.io/slack-184501/tic-tac-toe:latest
+          image: gcr.io/slack-184501/tic-tac-toe:2.1.0
           imagePullPolicy: Always
           env:
           - name: NODE_ENV
