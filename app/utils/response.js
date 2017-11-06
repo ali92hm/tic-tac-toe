@@ -1,42 +1,45 @@
-exports.respondWithResult = (res, statusCode) => {
-  statusCode = statusCode || 200
+/*
+* Handles responding to api call with result
+* @param {Object} res - express result object
+* @param {integer} [statusCode] - http status code
+*/
+const respondWithResult = (res, statusCode = 200) => {
   return (entity) => {
     if (entity) {
       return res.status(statusCode).json(entity)
     }
+    return res.status(statusCode).send()
   }
 }
 
-exports.formatSlackResult = () => {
-  return (message) => {
-    return {
-      response_type: 'in_channel',
-      text: message.toString()
-    }
-  }
-}
-
-exports.respondWithSuccess = (res, statusCode) => {
-  statusCode = statusCode || 202
-  return () => {
-    return res.status(statusCode).send({message: 'success'})
-  }
-}
-
-exports.handleRequestError = (res, message, statusCode) => {
-  statusCode = statusCode || 400
+/*
+* Handles responding to api call with 400 for bad requests
+* @param {Object} res - express result object
+* @param {integer} [statusCode] - http status code
+*/
+const handleRequestError = (res, message, statusCode = 400) => {
   return res.status(statusCode).send({
     type: 'Bad request',
     error: message
   })
 }
 
-exports.handleInternalError = (res, statusCode) => {
-  statusCode = statusCode || 500
+/*
+* Handles responding to api call with 500 for internal errors
+* @param {Object} res - express result object
+* @param {integer} [statusCode] - http status code
+*/
+const handleInternalError = (res, statusCode = 500) => {
   return (err) => {
     res.status(statusCode).send({
       type: 'Internal Error',
-      error: err.message
+      error: err ? err.message : 'unknown error'
     })
   }
+}
+
+module.exports = {
+  respondWithResult,
+  handleRequestError,
+  handleInternalError
 }
