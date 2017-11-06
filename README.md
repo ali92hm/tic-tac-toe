@@ -58,7 +58,7 @@ What this command does:
 You can use [ngrok](https://ngrok.com/) or [localtunnel](https://github.com/localtunnel/localtunnel) to test against slack locally.
 
 ## CI
-This project uses Google Cloud platform for atomatic build, test and store containers in gcr registry. 
+This project uses Google Cloud platform for atomatic build, test and store containers in gcr registry.
 
 ## Deployment
 Google Container engine (Kubernetes) is used for deployment of this project.
@@ -114,6 +114,7 @@ Board sample
     ├── node_modules                - Contains bower modules
     ├── config                      - configuration for app
     │   ├── default.js                  - Reading env variables and providing constants etc.
+    │   ├── test.js                     - Env variables for testing
     │   ├── express.js                  - Configures express
     │   ├── mongo.js                    - Configures mongo (datastore)
     │   └── winston.js                  - Configures winston (logging)

@@ -16,6 +16,7 @@
   },
   "jest": {
     "testEnvironment": "node",
+    "testPathIgnorePatterns" : ["<rootDir>/config"],
     "verbose": true
   },
   "standard": {
