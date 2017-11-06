@@ -87,17 +87,17 @@ describe('parseSlackUserId(token)', () => {
 
   test('should throw SlackNotUserIdError if token is empty string', () => {
     let fn = () => { parser.parseSlackUserId('') }
-    expect(fn).toThrow(Errors.SlackNotUserIdError)
+    expect(fn).toThrow()
   })
 
   test('should throw SlackNotUserIdError if token is undefined', () => {
     let fn = () => { parser.parseSlackUserId('') }
-    expect(fn).toThrow(Errors.SlackNotUserIdError)
+    expect(fn).toThrow()
   })
 
   test('should throw SlackNotUserIdError if token is not a user string', () => {
     let fn = () => { parser.parseSlackUserId('sdlf@<23df>||') }
-    expect(fn).toThrow(Errors.SlackNotUserIdError)
+    expect(fn).toThrow()
   })
 })
 
@@ -121,17 +121,17 @@ describe('getOnlyItem(array)', () => {
 
   test('should throw ArgumentError if array has more than 1 item', () => {
     let fn = () => { parser.getOnlyItem([obj, obj]) }
-    expect(fn).toThrow(Errors.ArgumentError)
+    expect(fn).toThrowError()
   })
 
   test('should throw ArgumentError if object if not array', () => {
     let fn = () => { parser.getOnlyItem(obj) }
-    expect(fn).toThrow(Errors.ArgumentError)
+    expect(fn).toThrowError()
   })
 
   test('should throw ArgumentError if array is empty', () => {
     let fn = () => { parser.getOnlyItem([]) }
-    expect(fn).toThrow(Errors.ArgumentError)
+    expect(fn).toThrow()
   })
 })
 
@@ -146,22 +146,22 @@ describe('parseWholeNumber(string)', () => {
 
   test('should throw NotIntegerError if string has decimal point', () => {
     let fn = () => { parser.parseWholeNumber('1.45') }
-    expect(fn).toThrow(Errors.NotIntegerError)
+    expect(fn).toThrow()
   })
 
   test('should throw NotIntegerError if string non number', () => {
     let fn = () => { parser.parseWholeNumber('a2134') }
-    expect(fn).toThrow(Errors.NotIntegerError)
+    expect(fn).toThrow()
   })
 
   test('should throw NotIntegerError if string empty string', () => {
     let fn = () => { parser.parseWholeNumber('') }
-    expect(fn).toThrow(Errors.NotIntegerError)
+    expect(fn).toThrow()
   })
 
   test('should throw NotIntegerError if string is undefined', () => {
     let fn = () => { parser.parseWholeNumber() }
-    expect(fn).toThrow(Errors.NotIntegerError)
+    expect(fn).toThrow()
   })
 })
 

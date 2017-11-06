@@ -3,17 +3,17 @@
 *******************/
 
 class ArgumentError extends Error {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
   }
 }
 
-class NotIntegerError extends ArgumentError {
-  constructor (message) {
-    super(message)
+class NotIntegerError extends Error {
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -24,8 +24,8 @@ class NotIntegerError extends ArgumentError {
 * Game Errors *
 ***************/
 class GameError extends Error {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -33,8 +33,8 @@ class GameError extends Error {
 }
 
 class CellTakenError extends GameError {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -42,8 +42,8 @@ class CellTakenError extends GameError {
 }
 
 class InvalidMoveError extends GameError {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -51,8 +51,8 @@ class InvalidMoveError extends GameError {
 }
 
 class NoPlayerError extends GameError {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -60,8 +60,8 @@ class NoPlayerError extends GameError {
 }
 
 class NotTurnError extends GameError {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -69,8 +69,8 @@ class NotTurnError extends GameError {
 }
 
 class SamePlayersError extends GameError {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -78,8 +78,8 @@ class SamePlayersError extends GameError {
 }
 
 class WrongPlayerError extends GameError {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -91,8 +91,8 @@ class WrongPlayerError extends GameError {
 ****************/
 
 class SlackError extends Error {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -100,8 +100,8 @@ class SlackError extends Error {
 }
 
 class SlackAPIError extends SlackError {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -109,8 +109,8 @@ class SlackAPIError extends SlackError {
 }
 
 class SlackGameInProgressError extends SlackError {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -118,8 +118,8 @@ class SlackGameInProgressError extends SlackError {
 }
 
 class SlacNoGameInProgressError extends SlackError {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -127,8 +127,8 @@ class SlacNoGameInProgressError extends SlackError {
 }
 
 class SlackNotUserIdError extends SlackError {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
@@ -136,8 +136,8 @@ class SlackNotUserIdError extends SlackError {
 }
 
 class SlackUknownCommandError extends SlackError {
-  constructor (message) {
-    super(message)
+  constructor (...args) {
+    super(...args)
     this.name = this.constructor.name
 
     Error.captureStackTrace(this, this.constructor)
