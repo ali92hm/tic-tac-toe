@@ -9,7 +9,7 @@ services:
     ports:
       - 3000:3000
     command: npm run dev
-    env_file: dev.env
+    env_file: .env
     depends_on:
       - db
 # MongoDB data viewer

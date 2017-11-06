@@ -39,4 +39,4 @@ public/components
 .DS_Store
 
 # Keys
-dev.env
+.env
