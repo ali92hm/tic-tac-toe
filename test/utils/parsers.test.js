@@ -1,5 +1,4 @@
 const parser = require('../../app/utils/parsers')
-const Errors = require('../../app/utils/Errors')
 
 describe('parseCommand(text)', () => {
   var defaultRetrun
