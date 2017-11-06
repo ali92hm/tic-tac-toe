@@ -42,12 +42,21 @@ module.exports = {
     messages: {
       noGameInProgress: ['Oops, no game in progress!!', 'You can start one by saying `/ttt challenge @name`'],
       gameInProgress: ['There is a game in progress for this channel :cry:', 'Please try another channel'],
+      draw: ['What a shame. No one won the game :scream:'],
+      winner: ['won the game :tada:'],
+      nextMoveHint: ['Type `/ttt place 1-9` to make a move.'],
+      catchAllMessage: ['Oops, something went wrong.'],
+      wrongPlayer: ['Sorry, you\'re not one of the players :expressionless:'],
+      notTurn: ['It\'s not your turn :stuck_out_tongue_closed_eyes:'],
+      notUserId: ['Please try selecting someone using `@username`'],
       noOpponent: ['No opponent specified.', 'Please use `/ttt challenge @username`'],
       challengeSelf: ['You cant challenge yourself.', 'Please pick someone else as opponent'],
+      invalidMove: ['Place numbers between 1-9'],
+      help: ['Type `/ttt help` to see the available options.'],
       helpMessage: [ 'Hello :wave: Welcome to Tic-Tac-Toe Slack game.',
         'Type `/ttt challenge @name` to start a game.',
         'Type `/ttt display` to display the ongoing game.',
-        'Type `/ttt place 1-9` to place a move.']
+        'Type `/ttt place [1-9]` to place a move.']
     }
   }
 }
