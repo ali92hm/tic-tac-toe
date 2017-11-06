@@ -57,13 +57,28 @@ What this command does:
 
 You can use [ngrok](https://ngrok.com/) or [localtunnel](https://github.com/localtunnel/localtunnel) to test against slack locally.
 
+## CI
+This project uses Google Cloud platform for atomatic build, test and store containers in gcr registry. 
+
 ## Deployment
-//TODO
+Google Container engine (Kubernetes) is used for deployment of this project.
+
+This cluster runs:
+
+* Kube-lego: for Let's encrypt cert management and tls
+* Ingress controllers: to manage incoming traffic from different domains (for staging and prod)
+* MongoDB: for database
+* Tic-Tac-toe express application (3 replicas)
+    * Slack command `/staging args` points to the staging environment
+    * Slack command `/ttt args` points to the prod enviroment
+
+## Monitoring
+Google Stackdriver is used for monitoring the cluster and creating alerts. It gathers logs from applications and allows users to run queries on them.
 
 ## Playing instructions
 ### Slack
 * Start a game by typing `/ttt challenge @opponent`
-    * There can be at most one game in progress per chanel
+    * There can be at most one game in progress per channel
     * You cannot challenge yourself
 * Place a move by typing `/ttt place [1-9]`
     * You can only play if you are a player of that game
@@ -94,6 +109,7 @@ Board sample
     ├── package.json                - Used npm packages
     ├── .env.example                - Example of env variables needed
     ├── .env                        - File env variables are read from (ignored by git)
+    ├── deployment                  - Contains deployment scripts and k8s yml files
     ├── README.md
     ├── node_modules                - Contains bower modules
     ├── config                      - configuration for app
@@ -111,7 +127,9 @@ Board sample
     │   └── utils                       - Utility scripts
     └── test                        - Folder containing all the tests (mirrors app directory)
 
-
-## Potential Bugs
-
 ## To do
+* Add another interface, REST API for playing tic tac toe
+* Use slack interactive buttons for placing moves
+* **Write lot lot more tests**
+* Implement OAuth for installation on other teams
+* Add command for showing leader board (per team, per channel)
