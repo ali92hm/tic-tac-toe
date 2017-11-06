@@ -97,11 +97,10 @@ const challenge = async (teamId, channelId, userId, args) => {
   let user = await getOrCreateUser(teamId, userId)
   let opponentUser = await getOrCreateUser(teamId, opponentUserId)
 
-  // TODO: fix this
-  let game = await gameController.createGame(user, opponentUser)
-  await services.db.slackGame.create(teamId, channelId, game)
+  // Create a game
+  let slackGame = await services.db.slackGame.create(teamId, channelId, user, opponentUser)
   // Render the board, mention all players, mention whose turn it is, give hits)
-  let result = render(game, true, true, true)
+  let result = render(slackGame.game, true, true, true)
   return formatter.slackResponseFormatter(result)
 }
 
@@ -116,10 +115,8 @@ const display = async (teamId, channelId) => {
   winston.verbose('display', teamId, channelId)
   // get the in progress game
   let slackGame = await services.db.slackGame.getInProgress(teamId, channelId)
-  // retrieve the full game
-  let fullGame = await gameController.getGame(slackGame.game)
   // Render the board, mention all players, mention whose turn it is, give hits)
-  let result = render(fullGame, true, true, true)
+  let result = render(slackGame.game, true, true, true)
   return formatter.slackResponseFormatter(result)
 }
 
@@ -191,7 +188,7 @@ const handleError = (error, originalText) => {
 
   // Handles SlacNoGameInProgressError - when there is no game in progress for a given channel in a team
   if (error instanceof Errors.SlacNoGameInProgressError) {
-    return formatter.slackErrorFormatter(config.get('slack.messages.gameInProgress'))
+    return formatter.slackErrorFormatter(config.get('slack.messages.noGameInProgress'))
   }
 
   // Handles SamePlayersError - when a user challenges themselves

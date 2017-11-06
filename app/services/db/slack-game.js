@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const SlackGame = require('./models/slack-game')
+const gameService = require('./game')
 const Errors = require('../../utils/errors')
 
 /*
@@ -45,6 +46,25 @@ const findByQuery = (criteria, full = true) => {
 * @returns {Promise<SlackGame>} slackGame - mongoose slackGame object
 */
 const getInProgress = async (teamId, channelId) => {
+  let inProgressGame = await _getInProgress(teamId, channelId)
+  if (!inProgressGame) {
+    throw new Errors.SlacNoGameInProgressError(`No game in progress
+      for team ${teamId} and channel ${channelId}`)
+  }
+
+  // Retrieve the full populated object
+  inProgressGame.game = await gameService.getById(inProgressGame.game, true)
+  return inProgressGame
+}
+
+/*
+* Private Get slackGame that is in progress for a given teamId and channelId
+* @async
+* @param {string} teamId - normalized slack teamId
+* @param {string} channelId - normalized slack channelId
+* @returns {Promise<SlackGame>} slackGame - mongoose slackGame object
+*/
+const _getInProgress = async (teamId, channelId) => {
   // God, why does mongo not have joins
   let slackGames = await findByQuery({teamId: teamId, channelId: channelId})
   let inProgressGames = _.filter(slackGames, (slackGame) => !slackGame.game.finished)
@@ -59,15 +79,17 @@ const getInProgress = async (teamId, channelId) => {
 * Create a slackGame
 * @param {string} teamId - normalized slack teamId
 * @param {string} channelId - normalized slack channelId
-* @param {Game} game - mongoose game object
+* @param {User} user - mongo user object for xPlayer
+* @param {User} opponent - mongo user object for oPlayer
 * @returns {Promise<SlackGame>} slackGame - mongoose slackGame object
 */
-const create = async (teamId, channelId, game) => {
-  if (await getInProgress(teamId, channelId)) {
+const create = async (teamId, channelId, user, opponent) => {
+  if (await _getInProgress(teamId, channelId)) {
     throw new Errors.SlackGameInProgressError(`There is already a game in progress
       for team ${teamId} and channel ${channelId}`)
   }
 
+  let game = await gameService.create(user, opponent)
   return SlackGame.create({
     teamId: teamId,
     channelId: channelId,
