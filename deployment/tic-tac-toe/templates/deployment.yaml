@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "ttt-helm.fullname" . }}
+  labels:
+    app: {{ template "ttt-helm.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "ttt-helm.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NODE_ENV
+              value: {{ .Values.environment.NODE_ENV }}
+            - name: SLACK_CLIENT_ID
+              value: {{ .Values.environment.SLACK_CLIENT_ID }}
+            - name: SLACK_SECRET
+              value: {{ .Values.environment.SLACK_SECRET }}
+            - name: SLACK_DEV_BEARER_TOKEN
+              value: {{ .Values.environment.SLACK_DEV_BEARER_TOKEN }}
+            - name: SLACK_REQ_TOKEN
+              value: {{ .Values.environment.SLACK_REQ_TOKEN }}
+            - name: MONGODB_URI
+              value: {{ .Values.environment.MONGODB_URI }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: {{ .Values.service.internalPort }}

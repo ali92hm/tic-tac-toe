@@ -1,0 +1,21 @@
+
+image:
+  repository: gcr.io/slack-184501/tic-tac-toe
+  tag: stable
+  replicaCount: 3
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 3000
+
+ingress:
+  host: "ttt.alihm.net"
+
+environment:
+  NODE_ENV: "production"
+  SLACK_CLIENT_ID:
+  SLACK_SECRET:
+  SLACK_DEV_BEARER_TOKEN:
+  SLACK_REQ_TOKEN:
+  MONGODB_URI: mongodb://db-mongodb.db/prod
